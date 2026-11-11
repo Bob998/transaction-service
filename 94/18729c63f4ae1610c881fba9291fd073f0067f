@@ -1,0 +1,29 @@
+src/main/java/com/ganjunbao/transaction/dto/ErrorResponse.java
+  h_f973ca68e14391 1-47
+pom.xml
+  h_f973ca68e14391 53-57
+src/main/java/com/ganjunbao/transaction/service/TransactionService.java
+  h_f973ca68e14391 40
+src/test/java/com/ganjunbao/transaction/service/TransactionServiceTest.java
+  h_f973ca68e14391 1-118
+src/main/java/com/ganjunbao/transaction/exception/TransactionNotFoundException.java
+  h_f973ca68e14391 3-10
+src/main/java/com/ganjunbao/transaction/controller/TransactionController.java
+  h_f973ca68e14391 1-45
+src/main/java/com/ganjunbao/transaction/test.java
+  h_f973ca68e14391 1-10
+src/main/java/com/ganjunbao/transaction/exception/GlobalExceptionHandler.java
+  h_f973ca68e14391 1-55
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.6",
+  "base_commit_sha": "9418729c63f4ae1610c881fba9291fd073f0067f",
+  "prompts": {},
+  "logical_commit_id": "9418729c63f4ae1610c881fba9291fd073f0067f",
+  "humans": {
+    "h_f973ca68e14391": {
+      "author": "ganjunbao <ganjunbao@bigo.sg>"
+    }
+  }
+}
