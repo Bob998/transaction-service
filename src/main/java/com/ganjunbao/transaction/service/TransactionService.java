@@ -37,7 +37,7 @@ public class TransactionService {
 
     public Transaction confirm(String id) {
         Transaction transaction = getById(id);
-        if (transaction.getStatus() == TransactionStatus.PENDING) {
+        if (transaction.getStatus() != TransactionStatus.PENDING) {
             throw new InvalidTransactionStateException("只有待处理交易才能确认");
         }
 
