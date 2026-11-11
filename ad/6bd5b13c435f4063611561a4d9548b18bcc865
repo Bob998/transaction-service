@@ -1,0 +1,17 @@
+README.md
+  h_f973ca68e14391 1-122
+WEEKLY_REVIEW.md
+  h_f973ca68e14391 1-79
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.6",
+  "base_commit_sha": "ad6bd5b13c435f4063611561a4d9548b18bcc865",
+  "prompts": {},
+  "logical_commit_id": "ad6bd5b13c435f4063611561a4d9548b18bcc865",
+  "humans": {
+    "h_f973ca68e14391": {
+      "author": "ganjunbao <ganjunbao@bigo.sg>"
+    }
+  }
+}
