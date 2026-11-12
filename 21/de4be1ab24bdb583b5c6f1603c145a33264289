@@ -1,0 +1,90 @@
+src/main/java/com/ganjunbao/transaction/repository/TransactionRepository.java
+  h_f973ca68e14391 3-4,6,14-32,34-44,46-48
+  h_f973ca68e14391 49,51
+src/main/java/com/ganjunbao/transaction/repository/PaymentChannelRepository.java
+  h_f973ca68e14391 1-25
+src/main/resources/db/migration/V4__create_audit_log_table.sql
+  h_f973ca68e14391 1-20
+src/main/java/com/ganjunbao/transaction/repository/AuditLogRepository.java
+  h_f973ca68e14391 1-44
+src/main/java/com/ganjunbao/transaction/model/TransactionAttemptStatus.java
+  h_f973ca68e14391 1-7
+src/main/resources/db/migration/V1__create_channel_table.sql
+  h_f973ca68e14391 1-13
+src/main/java/com/ganjunbao/transaction/exception/ChannelNotAvailableException.java
+  h_f973ca68e14391 1,3,5-6,8
+src/test/java/com/ganjunbao/transaction/mapper/InMemoryTransactionMapper.java
+  h_f973ca68e14391 1-36
+src/main/java/com/ganjunbao/transaction/mapper/TransactionAttemptMapper.java
+  h_f973ca68e14391 1-66
+src/main/java/com/ganjunbao/transaction/exception/GlobalExceptionHandler.java
+  h_f973ca68e14391 55-86
+src/main/resources/db/migration/V2__create_transaction_table.sql
+  h_f973ca68e14391 1-35
+src/main/java/com/ganjunbao/transaction/model/PaymentChannel.java
+  h_f973ca68e14391 1-40
+src/main/java/com/ganjunbao/transaction/dto/CreateTransactionRequest.java
+  h_f973ca68e14391 18-29,44-67
+src/main/resources/db/migration/V5__insert_default_channel.sql
+  h_f973ca68e14391 1-10
+src/main/java/com/ganjunbao/transaction/model/ChannelStatus.java
+  h_f973ca68e14391 1-6
+pom.xml
+  h_f973ca68e14391 58-82
+src/main/java/com/ganjunbao/transaction/service/TransactionService.java
+  h_f973ca68e14391 4,7,10-12,15,17-18,24-26,29-32,35-37,40-50,52-62,64-66,68,71-72,74-75,83,91,93-101,104,107,114,116-124
+  h_f973ca68e14391 27-28,33,39,87-89,109-111
+src/main/resources/db/migration/V6__add_currency_created_at_index.sql
+  h_f973ca68e14391 1-2
+src/main/java/com/ganjunbao/transaction/mapper/TransactionMapper.java
+  h_f973ca68e14391 1-88
+  h_f973ca68e14391 89-93
+src/main/java/com/ganjunbao/transaction/mapper/AuditLogMapper.java
+  h_f973ca68e14391 1-47
+src/main/java/com/ganjunbao/transaction/mapper/PaymentChannelMapper.java
+  h_f973ca68e14391 1-25
+src/main/resources/application.properties
+  h_f973ca68e14391 2-13
+src/main/resources/db/migration/V3__create_transaction_attempt_table.sql
+  h_f973ca68e14391 1-37
+src/main/java/com/ganjunbao/transaction/model/Transaction.java
+  h_f973ca68e14391 3-4,6,13-18,20-22,30-40,42-43,45,49,68,70-90
+  h_f973ca68e14391 19,23-28
+src/test/java/com/ganjunbao/transaction/service/TransactionServiceTest.java
+  h_f973ca68e14391 6,30-35,38-40,42-43
+  h_f973ca68e14391 9-12,20-22,25,41,44-63,71-73,89-91,107-109,122-124,145-147,163-165
+src/main/java/com/ganjunbao/transaction/model/TransactionAttempt.java
+  h_f973ca68e14391 1-89
+src/main/java/com/ganjunbao/transaction/model/AuditLog.java
+  h_f973ca68e14391 1-61
+src/main/java/com/ganjunbao/transaction/repository/TransactionAttemptRepository.java
+  h_f973ca68e14391 1-54
+src/main/java/com/ganjunbao/transaction/exception/DuplicateIdempotencyKeyException.java
+  h_f973ca68e14391 1-9
+.gitignore
+  h_f973ca68e14391 34-35
+README.md
+  h_f973ca68e14391 3,14-17,25-49,52-53,64-65,78,100-103,111-112,115-119,130-133,138-140,142-143,145-149,173-180
+WEEKLY_REVIEW.md
+  h_f973ca68e14391 79
+compose.yaml
+  h_f973ca68e14391 1-22
+docs/DATA_MODEL.md
+  h_f973ca68e14391 1-232
+docs/SQL_OPTIMIZATION.md
+  h_f973ca68e14391 1-81
+docs/WEEK2_REVIEW.md
+  h_f973ca68e14391 1-127
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.6",
+  "base_commit_sha": "21de4be1ab24bdb583b5c6f1603c145a33264289",
+  "prompts": {},
+  "logical_commit_id": "21de4be1ab24bdb583b5c6f1603c145a33264289",
+  "humans": {
+    "h_f973ca68e14391": {
+      "author": "ganjunbao <ganjunbao@bigo.sg>"
+    }
+  }
+}
