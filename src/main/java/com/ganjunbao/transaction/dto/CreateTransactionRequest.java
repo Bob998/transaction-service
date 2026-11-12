@@ -15,6 +15,18 @@ public class CreateTransactionRequest {
     @Size(max = 200, message = "交易描述不能超过200个字符")
     private String description;
 
+    @NotBlank(message = "幂等键不能为空")
+    @Size(max = 100, message = "幂等键不能超过100个字符")
+    private String idempotencyKey;
+
+    @NotBlank(message = "币种不能为空")
+    @Size(min = 3, max = 3, message = "币种必须是3位代码")
+    private String currency;
+
+    @NotBlank(message = "通道编码不能为空")
+    @Size(max = 50, message = "通道编码不能超过50个字符")
+    private String channelCode;
+
     public BigDecimal getAmount() {
         return amount;
     }
@@ -29,5 +41,29 @@ public class CreateTransactionRequest {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getIdempotencyKey() {
+        return idempotencyKey;
+    }
+
+    public void setIdempotencyKey(String idempotencyKey) {
+        this.idempotencyKey = idempotencyKey;
+    }
+
+    public String getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(String currency) {
+        this.currency = currency;
+    }
+
+    public String getChannelCode() {
+        return channelCode;
+    }
+
+    public void setChannelCode(String channelCode) {
+        this.channelCode = channelCode;
     }
 }

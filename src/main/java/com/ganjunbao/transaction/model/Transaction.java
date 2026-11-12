@@ -1,21 +1,52 @@
 package com.ganjunbao.transaction.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 public class Transaction {
     private String id;
     private BigDecimal amount;
     private String description;
     private TransactionStatus status;
-    private LocalDateTime createdAt;
+    private OffsetDateTime createdAt;
+    private String idempotencyKey;
+    private Long channelId;
+    private String currency;
+    private OffsetDateTime updatedAt;
+    private Long databaseId;
 
-    public Transaction(String id, BigDecimal amount, String description, TransactionStatus status, LocalDateTime createdAt) {
+    public Transaction() {}
+
+    public Transaction(String id, BigDecimal amount, String description, TransactionStatus status, OffsetDateTime createdAt) {
         this.id = id;
         this.amount = amount;
         this.description = description;
         this.status = status;
         this.createdAt = createdAt;
+    }
+
+    public Transaction(
+            String id,
+            String idempotencyKey,
+            Long channelId,
+            BigDecimal amount,
+            String currency,
+            String description,
+            TransactionStatus status,
+            OffsetDateTime createdAt,
+            OffsetDateTime updatedAt
+    ) {
+        this.id = id;
+        this.idempotencyKey = idempotencyKey;
+        this.channelId = channelId;
+        this.amount = amount;
+        this.currency = currency;
+        this.description = description;
+        this.status = status;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
     }
 
     public String getId() {
@@ -34,8 +65,29 @@ public class Transaction {
         return status;
     }
 
-    public LocalDateTime getCreatedAt() {
+    public OffsetDateTime getCreatedAt() {
         return createdAt;
+    }
+
+    public String getIdempotencyKey() {
+        return idempotencyKey;
+    }
+
+    public Long getChannelId() {
+        return channelId;
+    }
+
+    public String getCurrency() {
+        return currency;
+    }
+
+    public OffsetDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    @JsonIgnore
+    public Long getDatabaseId() {
+        return databaseId;
     }
 
     public void confirm() {

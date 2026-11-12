@@ -3,8 +3,13 @@ package com.ganjunbao.transaction.service;
 import com.ganjunbao.transaction.dto.CreateTransactionRequest;
 import com.ganjunbao.transaction.exception.InvalidTransactionStateException;
 import com.ganjunbao.transaction.exception.TransactionNotFoundException;
+import com.ganjunbao.transaction.mapper.InMemoryTransactionMapper;
 import com.ganjunbao.transaction.model.Transaction;
 import com.ganjunbao.transaction.model.TransactionStatus;
+import com.ganjunbao.transaction.model.PaymentChannel;
+import com.ganjunbao.transaction.repository.PaymentChannelRepository;
+import com.ganjunbao.transaction.repository.AuditLogRepository;
+import com.ganjunbao.transaction.repository.TransactionAttemptRepository;
 import com.ganjunbao.transaction.repository.TransactionRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,16 +17,50 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 public class TransactionServiceTest {
     private TransactionService transactionService;
 
+//    @BeforeEach
+//    public void setUp() {
+//        TransactionRepository transactionRepository = new TransactionRepository();
+//        transactionService = new TransactionService(transactionRepository);
+//    }
+
     @BeforeEach
     public void setUp() {
-        TransactionRepository transactionRepository = new TransactionRepository();
-        transactionService = new TransactionService(transactionRepository);
+        InMemoryTransactionMapper transactionMapper =
+                new InMemoryTransactionMapper();
+
+        TransactionRepository transactionRepository =
+                new TransactionRepository(transactionMapper);
+
+        PaymentChannel paymentChannel = mock(PaymentChannel.class);
+        when(paymentChannel.getId()).thenReturn(1L);
+
+        PaymentChannelRepository paymentChannelRepository =
+                mock(PaymentChannelRepository.class);
+        when(paymentChannelRepository.findActiveByCode(anyString()))
+                .thenReturn(Optional.of(paymentChannel));
+
+        TransactionAttemptRepository transactionAttemptRepository =
+                mock(TransactionAttemptRepository.class);
+
+        AuditLogRepository auditLogRepository =
+                mock(AuditLogRepository.class);
+
+        transactionService = new TransactionService(
+                transactionRepository,
+                paymentChannelRepository,
+                transactionAttemptRepository,
+                auditLogRepository
+        );
     }
 
     @Test
@@ -29,6 +68,9 @@ public class TransactionServiceTest {
         CreateTransactionRequest request = new CreateTransactionRequest();
         request.setAmount(new BigDecimal("100.50"));
         request.setDescription("购买商品");
+        request.setIdempotencyKey("test-create-001");
+        request.setCurrency("CNY");
+        request.setChannelCode("DEMO");
 
         Transaction transaction = transactionService.create(request);
 
@@ -44,6 +86,9 @@ public class TransactionServiceTest {
         CreateTransactionRequest request = new CreateTransactionRequest();
         request.setAmount(new BigDecimal("200.00"));
         request.setDescription("查询测试");
+        request.setIdempotencyKey("test-find-001");
+        request.setCurrency("CNY");
+        request.setChannelCode("DEMO");
 
         Transaction created = transactionService.create(request);
         Transaction found = transactionService.getById(created.getId());
@@ -59,6 +104,9 @@ public class TransactionServiceTest {
         CreateTransactionRequest request = new CreateTransactionRequest();
         request.setAmount(new BigDecimal("300.00"));
         request.setDescription("确认测试");
+        request.setIdempotencyKey("test-confirm-001");
+        request.setCurrency("CNY");
+        request.setChannelCode("DEMO");
 
         Transaction created = transactionService.create(request);
         Transaction confirmed = transactionService.confirm(created.getId());
@@ -71,6 +119,9 @@ public class TransactionServiceTest {
         CreateTransactionRequest request = new CreateTransactionRequest();
         request.setAmount(new BigDecimal("88.00"));
         request.setDescription("取消测试");
+        request.setIdempotencyKey("test-cancel-001");
+        request.setCurrency("CNY");
+        request.setChannelCode("DEMO");
 
         Transaction created = transactionService.create(request);
         Transaction cancelled = transactionService.cancel(created.getId());
@@ -91,6 +142,9 @@ public class TransactionServiceTest {
         CreateTransactionRequest request = new CreateTransactionRequest();
         request.setAmount(new BigDecimal("500.00"));
         request.setDescription("重复确认测试");
+        request.setIdempotencyKey("test-confirm-twice-001");
+        request.setCurrency("CNY");
+        request.setChannelCode("DEMO");
 
         Transaction created = transactionService.create(request);
         transactionService.confirm(created.getId());
@@ -106,6 +160,9 @@ public class TransactionServiceTest {
         CreateTransactionRequest request = new CreateTransactionRequest();
         request.setAmount(new BigDecimal("600.00"));
         request.setDescription("确认后取消测试");
+        request.setIdempotencyKey("test-cancel-confirmed-001");
+        request.setCurrency("CNY");
+        request.setChannelCode("DEMO");
 
         Transaction created = transactionService.create(request);
         transactionService.confirm(created.getId());
