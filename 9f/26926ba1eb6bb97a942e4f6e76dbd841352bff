@@ -1,0 +1,80 @@
+src/main/java/com/ganjunbao/transaction/service/SelfInvocationExperimentService.java
+  h_f973ca68e14391 1-25
+  h_f973ca68e14391 26-29
+docs/STATE_MACHINE.md
+  h_f973ca68e14391 1-87
+pom.xml
+  h_f973ca68e14391 53-72
+src/main/java/com/ganjunbao/transaction/repository/OutboxEventRepository.java
+  h_f973ca68e14391 1-38
+src/main/java/com/ganjunbao/transaction/controller/TransactionController.java
+  h_f973ca68e14391 45-59
+src/main/java/com/ganjunbao/transaction/exception/GlobalExceptionHandler.java
+  h_f973ca68e14391 87-103
+src/main/resources/db/migration/V7__add_state_machine_and_optimistic_lock.sql
+  h_f973ca68e14391 1-25
+src/main/java/com/ganjunbao/transaction/service/TransactionFailureExperimentService.java
+  h_f973ca68e14391 1-23
+src/main/java/com/ganjunbao/transaction/mapper/OutboxEventMapper.java
+  h_f973ca68e14391 1-37
+src/test/java/com/ganjunbao/transaction/service/ConcurrentConfirmationIntegrationTest.java
+  h_f973ca68e14391 1-139
+  h_f973ca68e14391 140
+src/main/java/com/ganjunbao/transaction/model/TransactionStatus.java
+  h_f973ca68e14391 4-9
+  h_f973ca68e14391 10
+src/test/java/com/ganjunbao/transaction/service/SelfInvocationExperimentTest.java
+  h_f973ca68e14391 1-40
+  h_f973ca68e14391 41
+src/test/java/com/ganjunbao/transaction/service/TransactionRollbackIntegrationTest.java
+  h_f973ca68e14391 1-77
+  h_f973ca68e14391 78
+src/main/java/com/ganjunbao/transaction/service/TransactionService.java
+  h_f973ca68e14391 11,28,34-35,41,63,79,81,85,91-92,94-99,108-109,111,125-131,134-233,235-242
+  h_f973ca68e14391 93,124,132-133
+src/test/java/com/ganjunbao/transaction/support/PostgresContainerTest.java
+  h_f973ca68e14391 1-18
+src/main/java/com/ganjunbao/transaction/exception/OptimisticLockConflictException.java
+  h_f973ca68e14391 1-9
+src/main/java/com/ganjunbao/transaction/model/Transaction.java
+  h_f973ca68e14391 19,94-111
+src/main/java/com/ganjunbao/transaction/service/TransactionalWorkerService.java
+  h_f973ca68e14391 1-15
+src/main/resources/db/migration/V8__create_outbox_event_table.sql
+  h_f973ca68e14391 1-16
+src/main/java/com/ganjunbao/transaction/model/OutboxEvent.java
+  h_f973ca68e14391 1-79
+src/test/java/com/ganjunbao/transaction/service/OptimisticLockIntegrationTest.java
+  h_f973ca68e14391 1-87
+  h_f973ca68e14391 88
+src/test/java/com/ganjunbao/transaction/service/TransactionServiceTest.java
+  h_f973ca68e14391 14,59-61,66-67,85,104,119,174,179-219,222-264,267,269,271-277
+  h_f973ca68e14391 169-173,175-178,220-221
+src/main/java/com/ganjunbao/transaction/repository/TransactionRepository.java
+  h_f973ca68e14391 4,44-45
+  h_f973ca68e14391 46
+src/main/java/com/ganjunbao/transaction/mapper/TransactionAttemptMapper.java
+  h_f973ca68e14391 66-74
+src/main/java/com/ganjunbao/transaction/repository/TransactionAttemptRepository.java
+  h_f973ca68e14391 54-59
+docs/TRANSACTION_EXPERIMENTS.md
+  h_f973ca68e14391 1-164
+docs/WEEK3_REVIEW.md
+  h_f973ca68e14391 1-143
+src/main/java/com/ganjunbao/transaction/mapper/TransactionMapper.java
+  h_f973ca68e14391 25,37,54,85-88,96,99
+src/test/java/com/ganjunbao/transaction/TransactionServiceApplicationTests.java
+  h_f973ca68e14391 3,8
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.6",
+  "base_commit_sha": "9f26926ba1eb6bb97a942e4f6e76dbd841352bff",
+  "prompts": {},
+  "logical_commit_id": "9f26926ba1eb6bb97a942e4f6e76dbd841352bff",
+  "humans": {
+    "h_f973ca68e14391": {
+      "author": "ganjunbao <ganjunbao@bigo.sg>"
+    }
+  }
+}
