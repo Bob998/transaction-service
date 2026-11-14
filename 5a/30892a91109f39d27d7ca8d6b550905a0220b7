@@ -1,0 +1,41 @@
+docs/WEEK4_REVIEW.md
+  h_f973ca68e14391 1-167
+.github/workflows/test.yml
+  h_f973ca68e14391 1-35
+docs/TESTING_STRATEGY.md
+  h_f973ca68e14391 1-229
+pom.xml
+  h_f973ca68e14391 73-80,115-143
+src/main/java/com/ganjunbao/transaction/exception/PaymentGatewayException.java
+  h_f973ca68e14391 1-8
+src/main/java/com/ganjunbao/transaction/exception/PaymentGatewayTimeoutException.java
+  h_f973ca68e14391 1-8
+src/main/java/com/ganjunbao/transaction/gateway/PaymentGatewayClient.java
+  h_f973ca68e14391 1-90
+src/main/java/com/ganjunbao/transaction/gateway/PaymentGatewayRequest.java
+  h_f973ca68e14391 1-10
+src/main/java/com/ganjunbao/transaction/gateway/PaymentGatewayResponse.java
+  h_f973ca68e14391 1-7
+src/test/java/com/ganjunbao/transaction/controller/TransactionApiIntegrationTest.java
+  h_f973ca68e14391 1-182
+src/test/java/com/ganjunbao/transaction/e2e/TransactionEndToEndTest.java
+  h_f973ca68e14391 1-63
+src/test/java/com/ganjunbao/transaction/gateway/PaymentGatewayClientTest.java
+  h_f973ca68e14391 1-149
+src/test/java/com/ganjunbao/transaction/service/TransactionServiceMockitoTest.java
+  h_f973ca68e14391 1-106
+src/test/java/com/ganjunbao/transaction/support/PostgresContainerTest.java
+  h_f973ca68e14391 14-18
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.6",
+  "base_commit_sha": "5a30892a91109f39d27d7ca8d6b550905a0220b7",
+  "prompts": {},
+  "logical_commit_id": "5a30892a91109f39d27d7ca8d6b550905a0220b7",
+  "humans": {
+    "h_f973ca68e14391": {
+      "author": "ganjunbao <ganjunbao@bigo.sg>"
+    }
+  }
+}
