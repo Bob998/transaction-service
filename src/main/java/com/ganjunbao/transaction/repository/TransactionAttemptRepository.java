@@ -51,4 +51,10 @@ public class TransactionAttemptRepository {
         return transactionAttemptMapper
                 .findByTransactionId(transactionId);
     }
+
+    public int countSuccessfulConfirmAttempts(Long transactionId) {
+        return transactionAttemptMapper
+                .countSuccessfulConfirmAttempts(transactionId);
+    }
+
 }

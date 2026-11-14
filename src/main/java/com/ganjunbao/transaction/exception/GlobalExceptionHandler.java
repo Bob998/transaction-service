@@ -84,4 +84,21 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.NOT_FOUND)
                 .body(response);
     }
+
+    @ExceptionHandler(OptimisticLockConflictException.class)
+    public ResponseEntity<ErrorResponse> handleOptimisticLockConflict(
+            OptimisticLockConflictException exception
+    ) {
+        ErrorResponse response = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.CONFLICT.value(),
+                "OPTIMISTIC_LOCK_CONFLICT",
+                exception.getMessage(),
+                Map.of()
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(response);
+    }
 }

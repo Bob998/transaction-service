@@ -11,6 +11,7 @@ import com.ganjunbao.transaction.repository.PaymentChannelRepository;
 import com.ganjunbao.transaction.repository.AuditLogRepository;
 import com.ganjunbao.transaction.repository.TransactionAttemptRepository;
 import com.ganjunbao.transaction.repository.TransactionRepository;
+import com.ganjunbao.transaction.repository.OutboxEventRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -55,11 +56,15 @@ public class TransactionServiceTest {
         AuditLogRepository auditLogRepository =
                 mock(AuditLogRepository.class);
 
+        OutboxEventRepository outboxEventRepository =
+                mock(OutboxEventRepository.class);
+
         transactionService = new TransactionService(
                 transactionRepository,
                 paymentChannelRepository,
                 transactionAttemptRepository,
-                auditLogRepository
+                auditLogRepository,
+                outboxEventRepository
         );
     }
 
@@ -77,7 +82,7 @@ public class TransactionServiceTest {
         assertNotNull(transaction.getId());
         assertEquals(new BigDecimal("100.50"), transaction.getAmount());
         assertEquals("购买商品", transaction.getDescription());
-        assertEquals(TransactionStatus.PENDING, transaction.getStatus());
+        assertEquals(TransactionStatus.CREATED, transaction.getStatus());
         assertNotNull(transaction.getCreatedAt());
     }
 
@@ -96,7 +101,7 @@ public class TransactionServiceTest {
         assertEquals(created.getId(), found.getId());
         assertEquals(new BigDecimal("200.00"), found.getAmount());
         assertEquals("查询测试", found.getDescription());
-        assertEquals(TransactionStatus.PENDING, found.getStatus());
+        assertEquals(TransactionStatus.CREATED, found.getStatus());
     }
 
     @Test
@@ -111,7 +116,7 @@ public class TransactionServiceTest {
         Transaction created = transactionService.create(request);
         Transaction confirmed = transactionService.confirm(created.getId());
 
-        assertEquals(TransactionStatus.CONFIRMED, confirmed.getStatus());
+        assertEquals(TransactionStatus.RISK_APPROVED, confirmed.getStatus());
     }
 
     @Test
@@ -166,6 +171,110 @@ public class TransactionServiceTest {
 
         Transaction created = transactionService.create(request);
         transactionService.confirm(created.getId());
+        transactionService.startProcessing(created.getId());
+
+        assertThrows(
+                InvalidTransactionStateException.class,
+                () -> transactionService.cancel(created.getId())
+        );
+    }
+
+    @Test
+    void shouldCompleteSuccessfulStateFlow() {
+        CreateTransactionRequest request = new CreateTransactionRequest();
+        request.setAmount(new BigDecimal("700.00"));
+        request.setDescription("完整成功流程测试");
+        request.setIdempotencyKey("test-success-flow-001");
+        request.setCurrency("CNY");
+        request.setChannelCode("DEMO");
+
+        Transaction created = transactionService.create(request);
+
+        assertEquals(
+                TransactionStatus.CREATED,
+                created.getStatus()
+        );
+
+        Transaction riskApproved =
+                transactionService.confirm(created.getId());
+
+        assertEquals(
+                TransactionStatus.RISK_APPROVED,
+                riskApproved.getStatus()
+        );
+
+        Transaction processing =
+                transactionService.startProcessing(created.getId());
+
+        assertEquals(
+                TransactionStatus.PROCESSING,
+                processing.getStatus()
+        );
+
+        Transaction succeeded =
+                transactionService.succeed(created.getId());
+
+        assertEquals(
+                TransactionStatus.SUCCEEDED,
+                succeeded.getStatus()
+        );
+    }
+
+    @Test
+    void shouldCompleteFailedStateFlow() {
+        CreateTransactionRequest request = new CreateTransactionRequest();
+        request.setAmount(new BigDecimal("800.00"));
+        request.setDescription("完整失败流程测试");
+        request.setIdempotencyKey("test-failed-flow-001");
+        request.setCurrency("CNY");
+        request.setChannelCode("DEMO");
+
+        Transaction created = transactionService.create(request);
+
+        Transaction riskApproved =
+                transactionService.confirm(created.getId());
+
+        assertEquals(
+                TransactionStatus.RISK_APPROVED,
+                riskApproved.getStatus()
+        );
+
+        Transaction processing =
+                transactionService.startProcessing(created.getId());
+
+        assertEquals(
+                TransactionStatus.PROCESSING,
+                processing.getStatus()
+        );
+
+        Transaction failed =
+                transactionService.fail(created.getId());
+
+        assertEquals(
+                TransactionStatus.FAILED,
+                failed.getStatus()
+        );
+    }
+
+    @Test
+    void shouldRejectTransitionAfterTransactionSucceeded() {
+        CreateTransactionRequest request = new CreateTransactionRequest();
+        request.setAmount(new BigDecimal("900.00"));
+        request.setDescription("成功终态测试");
+        request.setIdempotencyKey("test-terminal-state-001");
+        request.setCurrency("CNY");
+        request.setChannelCode("DEMO");
+
+        Transaction created = transactionService.create(request);
+
+        transactionService.confirm(created.getId());
+        transactionService.startProcessing(created.getId());
+        transactionService.succeed(created.getId());
+
+        assertThrows(
+                InvalidTransactionStateException.class,
+                () -> transactionService.fail(created.getId())
+        );
 
         assertThrows(
                 InvalidTransactionStateException.class,

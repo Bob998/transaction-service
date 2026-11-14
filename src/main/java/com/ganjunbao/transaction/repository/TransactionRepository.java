@@ -1,6 +1,7 @@
 package com.ganjunbao.transaction.repository;
 
 import com.ganjunbao.transaction.exception.DuplicateIdempotencyKeyException;
+import com.ganjunbao.transaction.exception.OptimisticLockConflictException;
 import com.ganjunbao.transaction.mapper.TransactionMapper;
 import com.ganjunbao.transaction.model.Transaction;
 import org.springframework.dao.DuplicateKeyException;
@@ -40,7 +41,9 @@ public class TransactionRepository {
         int updatedRows = transactionMapper.updateStatus(transaction);
 
         if (updatedRows == 0) {
-            throw new IllegalStateException("交易状态更新失败");
+            throw new OptimisticLockConflictException(
+                    transaction.getId()
+            );
         }
 
         return findById(transaction.getId())

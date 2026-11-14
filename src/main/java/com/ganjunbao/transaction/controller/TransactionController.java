@@ -42,4 +42,19 @@ public class TransactionController {
     public Transaction cancel(@PathVariable String id) {
         return transactionService.cancel(id);
     }
+
+    @PostMapping("/{id}/processing")
+    public Transaction startProcessing(@PathVariable String id) {
+        return transactionService.startProcessing(id);
+    }
+
+    @PostMapping("/{id}/succeed")
+    public Transaction succeed(@PathVariable String id) {
+        return transactionService.succeed(id);
+    }
+
+    @PostMapping("/{id}/fail")
+    public Transaction fail(@PathVariable String id) {
+        return transactionService.fail(id);
+    }
 }

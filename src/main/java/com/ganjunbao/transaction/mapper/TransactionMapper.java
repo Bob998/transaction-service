@@ -22,6 +22,7 @@ public interface TransactionMapper {
                 currency,
                 description,
                 status,
+                version,
                 created_at,
                 updated_at
             )
@@ -33,6 +34,7 @@ public interface TransactionMapper {
                 #{currency},
                 #{description},
                 #{status},
+                #{version},
                 #{createdAt},
                 #{updatedAt}
             )
@@ -49,6 +51,7 @@ public interface TransactionMapper {
                 currency,
                 description,
                 status,
+                version,
                 created_at,
                 updated_at
             FROM payment_transaction
@@ -79,6 +82,10 @@ public interface TransactionMapper {
             @Result(
                     column = "updated_at",
                     property = "updatedAt"
+            ),
+            @Result(
+                    column = "version",
+                    property = "version"
             )
     })
     Optional<Transaction> findByTransactionNo(String transactionNo);
@@ -86,8 +93,10 @@ public interface TransactionMapper {
     @Update("""
             UPDATE payment_transaction
             SET status = #{status},
+                version = version + 1,
                 updated_at = CURRENT_TIMESTAMP
             WHERE transaction_no = #{id}
+              AND version = #{version}
             """)
     int updateStatus(Transaction transaction);
 }

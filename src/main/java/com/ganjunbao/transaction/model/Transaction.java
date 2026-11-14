@@ -16,6 +16,7 @@ public class Transaction {
     private String currency;
     private OffsetDateTime updatedAt;
     private Long databaseId;
+    private Long version = 0L;
 
     public Transaction() {}
 
@@ -90,8 +91,24 @@ public class Transaction {
         return databaseId;
     }
 
-    public void confirm() {
-        this.status = TransactionStatus.CONFIRMED;
+    public Long getVersion() {
+        return version;
+    }
+
+    public void approveRisk() {
+        this.status = TransactionStatus.RISK_APPROVED;
+    }
+
+    public void startProcessing() {
+        this.status = TransactionStatus.PROCESSING;
+    }
+
+    public void succeed() {
+        this.status = TransactionStatus.SUCCEEDED;
+    }
+
+    public void fail() {
+        this.status = TransactionStatus.FAILED;
     }
 
     public void cancel() {

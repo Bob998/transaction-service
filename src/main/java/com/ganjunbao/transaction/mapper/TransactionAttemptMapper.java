@@ -63,4 +63,13 @@ public interface TransactionAttemptMapper {
             ORDER BY attempt_no
             """)
     List<TransactionAttempt> findByTransactionId(Long transactionId);
+
+    @Select("""
+        SELECT COUNT(*)
+        FROM transaction_attempt
+        WHERE transaction_id = #{transactionId}
+          AND request_data ->> 'action' = 'CONFIRM'
+          AND status = 'SUCCEEDED'
+        """)
+    int countSuccessfulConfirmAttempts(Long transactionId);
 }
