@@ -25,6 +25,17 @@ public class InMemoryTransactionMapper implements TransactionMapper {
     }
 
     @Override
+    public Optional<Transaction> findByIdempotencyKey(
+            String idempotencyKey
+    ) {
+        return storage.values().stream()
+                .filter(transaction -> idempotencyKey.equals(
+                        transaction.getIdempotencyKey()
+                ))
+                .findFirst();
+    }
+
+    @Override
     public int updateStatus(Transaction transaction) {
         if (!storage.containsKey(transaction.getId())) {
             return 0;

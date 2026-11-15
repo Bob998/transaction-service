@@ -12,6 +12,8 @@ import com.ganjunbao.transaction.repository.AuditLogRepository;
 import com.ganjunbao.transaction.repository.TransactionAttemptRepository;
 import com.ganjunbao.transaction.repository.TransactionRepository;
 import com.ganjunbao.transaction.repository.OutboxEventRepository;
+import com.ganjunbao.transaction.redis.IdempotencyResultCache;
+import com.ganjunbao.transaction.redis.RiskSlidingWindowService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -59,12 +61,26 @@ public class TransactionServiceTest {
         OutboxEventRepository outboxEventRepository =
                 mock(OutboxEventRepository.class);
 
+        IdempotencyResultCache idempotencyResultCache =
+                mock(IdempotencyResultCache.class);
+        when(idempotencyResultCache.get(anyString()))
+                .thenReturn(Optional.empty());
+
+        RiskSlidingWindowService riskSlidingWindowService =
+                mock(RiskSlidingWindowService.class);
+
+        ChannelQuotaGuard channelQuotaGuard =
+                mock(ChannelQuotaGuard.class);
+
         transactionService = new TransactionService(
                 transactionRepository,
                 paymentChannelRepository,
                 transactionAttemptRepository,
                 auditLogRepository,
-                outboxEventRepository
+                outboxEventRepository,
+                idempotencyResultCache,
+                riskSlidingWindowService,
+                channelQuotaGuard
         );
     }
 

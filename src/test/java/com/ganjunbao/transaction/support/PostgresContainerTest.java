@@ -1,7 +1,11 @@
 package com.ganjunbao.transaction.support;
 
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.lifecycle.Startables;
+
+import java.util.stream.Stream;
 
 public abstract class PostgresContainerTest {
 
@@ -12,7 +16,12 @@ public abstract class PostgresContainerTest {
                     .withUsername("test")
                     .withPassword("test");
 
+    @ServiceConnection(name = "redis")
+    protected static final GenericContainer<?> REDIS =
+            new GenericContainer<>("redis:7-alpine")
+                    .withExposedPorts(6379);
+
     static {
-        POSTGRES.start();
+        Startables.deepStart(Stream.of(POSTGRES, REDIS)).join();
     }
 }

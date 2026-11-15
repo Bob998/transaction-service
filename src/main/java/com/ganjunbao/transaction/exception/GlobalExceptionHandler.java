@@ -101,4 +101,83 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.CONFLICT)
                 .body(response);
     }
+
+    @ExceptionHandler(RateLimitExceededException.class)
+    public ResponseEntity<ErrorResponse> handleRateLimitExceeded(
+            RateLimitExceededException exception
+    ) {
+        ErrorResponse response = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.TOO_MANY_REQUESTS.value(),
+                "RATE_LIMIT_EXCEEDED",
+                exception.getMessage(),
+                Map.of()
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.TOO_MANY_REQUESTS)
+                .body(response);
+    }
+
+    @ExceptionHandler(RiskRejectedException.class)
+    public ResponseEntity<ErrorResponse> handleRiskRejected(
+            RiskRejectedException exception
+    ) {
+        ErrorResponse response = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.FORBIDDEN.value(),
+                "RISK_REJECTED",
+                exception.getMessage(),
+                Map.of()
+        );
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+    }
+
+    @ExceptionHandler(RiskControlUnavailableException.class)
+    public ResponseEntity<ErrorResponse> handleRiskControlUnavailable(
+            RiskControlUnavailableException exception
+    ) {
+        ErrorResponse response = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.SERVICE_UNAVAILABLE.value(),
+                "RISK_CONTROL_UNAVAILABLE",
+                exception.getMessage(),
+                Map.of()
+        );
+        return ResponseEntity
+                .status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(response);
+    }
+
+    @ExceptionHandler(ChannelQuotaExceededException.class)
+    public ResponseEntity<ErrorResponse> handleChannelQuotaExceeded(
+            ChannelQuotaExceededException exception
+    ) {
+        ErrorResponse response = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.TOO_MANY_REQUESTS.value(),
+                "CHANNEL_QUOTA_EXCEEDED",
+                exception.getMessage(),
+                Map.of()
+        );
+        return ResponseEntity
+                .status(HttpStatus.TOO_MANY_REQUESTS)
+                .body(response);
+    }
+
+    @ExceptionHandler(ChannelQuotaUnavailableException.class)
+    public ResponseEntity<ErrorResponse> handleChannelQuotaUnavailable(
+            ChannelQuotaUnavailableException exception
+    ) {
+        ErrorResponse response = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.SERVICE_UNAVAILABLE.value(),
+                "CHANNEL_QUOTA_UNAVAILABLE",
+                exception.getMessage(),
+                Map.of()
+        );
+        return ResponseEntity
+                .status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(response);
+    }
 }

@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -24,8 +25,12 @@ public class TransactionController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Transaction create(@Valid @RequestBody CreateTransactionRequest request) {
-        return transactionService.create(request);
+    public Transaction create(
+            @Valid @RequestBody CreateTransactionRequest request,
+            @RequestHeader(value = "X-User-Id", required = false)
+            String userId
+    ) {
+        return transactionService.create(request, userId);
     }
 
     @GetMapping("/{id}")

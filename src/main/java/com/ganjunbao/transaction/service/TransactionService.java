@@ -2,7 +2,10 @@ package com.ganjunbao.transaction.service;
 
 import com.ganjunbao.transaction.dto.CreateTransactionRequest;
 import com.ganjunbao.transaction.exception.ChannelNotAvailableException;
+import com.ganjunbao.transaction.exception.DuplicateIdempotencyKeyException;
 import com.ganjunbao.transaction.exception.InvalidTransactionStateException;
+import com.ganjunbao.transaction.exception.RiskControlUnavailableException;
+import com.ganjunbao.transaction.exception.RiskRejectedException;
 import com.ganjunbao.transaction.exception.TransactionNotFoundException;
 import com.ganjunbao.transaction.model.PaymentChannel;
 import com.ganjunbao.transaction.model.Transaction;
@@ -12,6 +15,10 @@ import com.ganjunbao.transaction.repository.OutboxEventRepository;
 import com.ganjunbao.transaction.repository.PaymentChannelRepository;
 import com.ganjunbao.transaction.repository.TransactionAttemptRepository;
 import com.ganjunbao.transaction.repository.TransactionRepository;
+import com.ganjunbao.transaction.redis.IdempotencyResultCache;
+import com.ganjunbao.transaction.redis.RiskSlidingWindowService;
+import com.ganjunbao.transaction.redis.RiskWindowResult;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,22 +33,44 @@ public class TransactionService {
     private final TransactionAttemptRepository transactionAttemptRepository;
     private final AuditLogRepository auditLogRepository;
     private final OutboxEventRepository outboxEventRepository;
+    private final IdempotencyResultCache idempotencyResultCache;
+    private final RiskSlidingWindowService riskSlidingWindowService;
+    private final ChannelQuotaGuard channelQuotaGuard;
 
     public TransactionService(
             TransactionRepository transactionRepository,
             PaymentChannelRepository paymentChannelRepository,
             TransactionAttemptRepository transactionAttemptRepository,
             AuditLogRepository auditLogRepository,
-            OutboxEventRepository outboxEventRepository
+            OutboxEventRepository outboxEventRepository,
+            IdempotencyResultCache idempotencyResultCache,
+            RiskSlidingWindowService riskSlidingWindowService,
+            ChannelQuotaGuard channelQuotaGuard
     ) {
         this.transactionRepository = transactionRepository;
         this.paymentChannelRepository = paymentChannelRepository;
         this.transactionAttemptRepository = transactionAttemptRepository;
         this.auditLogRepository = auditLogRepository;
         this.outboxEventRepository = outboxEventRepository;
+        this.idempotencyResultCache = idempotencyResultCache;
+        this.riskSlidingWindowService = riskSlidingWindowService;
+        this.channelQuotaGuard = channelQuotaGuard;
     }
 
     public Transaction create(CreateTransactionRequest request) {
+        return create(request, null);
+    }
+
+    public Transaction create(CreateTransactionRequest request, String userId) {
+        Transaction cachedTransaction = idempotencyResultCache
+                .get(request.getIdempotencyKey())
+                .orElse(null);
+        if (cachedTransaction != null) {
+            return cachedTransaction;
+        }
+
+        evaluateRiskWhenUserIsKnown(userId, request);
+
         String channelCode = request.getChannelCode()
                 .toUpperCase(Locale.ROOT);
 
@@ -50,6 +79,12 @@ public class TransactionService {
                 .orElseThrow(() ->
                         new ChannelNotAvailableException(channelCode)
                 );
+
+        channelQuotaGuard.reserve(
+                channelCode,
+                request.getAmount(),
+                request.getIdempotencyKey()
+        );
 
         OffsetDateTime now = OffsetDateTime.now();
 
@@ -65,7 +100,43 @@ public class TransactionService {
                 now
         );
 
-        return transactionRepository.insert(transaction);
+        Transaction createdTransaction;
+        try {
+            createdTransaction = transactionRepository.insert(transaction);
+        } catch (DuplicateIdempotencyKeyException exception) {
+            createdTransaction = transactionRepository
+                    .findByIdempotencyKey(request.getIdempotencyKey())
+                    .orElseThrow(() -> exception);
+        }
+        idempotencyResultCache.put(createdTransaction);
+        return createdTransaction;
+    }
+
+    private void evaluateRiskWhenUserIsKnown(
+            String userId,
+            CreateTransactionRequest request
+    ) {
+        if (userId == null || userId.isBlank()) {
+            return;
+        }
+
+        RiskWindowResult riskResult;
+        try {
+            riskResult = riskSlidingWindowService.evaluateAndRecord(
+                    userId,
+                    request.getIdempotencyKey(),
+                    request.getAmount()
+            );
+        } catch (DataAccessException exception) {
+            throw new RiskControlUnavailableException(exception);
+        }
+
+        if (!riskResult.allowed()) {
+            throw new RiskRejectedException(
+                    riskResult.transactionCount(),
+                    riskResult.totalAmount()
+            );
+        }
     }
 
     public Transaction getById(String id) {
@@ -98,6 +169,7 @@ public class TransactionService {
                 "{\"transactionId\":\"" + updated.getId()
                         + "\",\"status\":\"RISK_APPROVED\"}"
         );
+        idempotencyResultCache.evict(updated.getIdempotencyKey());
         return updated;
     }
 
@@ -129,6 +201,7 @@ public class TransactionService {
                 "{\"transactionId\":\"" + updated.getId()
                         + "\",\"status\":\"CANCELLED\"}"
         );
+        idempotencyResultCache.evict(updated.getIdempotencyKey());
         return updated;
     }
 
@@ -165,6 +238,8 @@ public class TransactionService {
                 "{\"transactionId\":\"" + updated.getId()
                         + "\",\"status\":\"PROCESSING\"}"
         );
+
+        idempotencyResultCache.evict(updated.getIdempotencyKey());
 
         return updated;
     }
@@ -203,6 +278,8 @@ public class TransactionService {
                         + "\",\"status\":\"SUCCEEDED\"}"
         );
 
+        idempotencyResultCache.evict(updated.getIdempotencyKey());
+
         return updated;
     }
 
@@ -239,6 +316,8 @@ public class TransactionService {
                 "{\"transactionId\":\"" + updated.getId()
                         + "\",\"status\":\"FAILED\"}"
         );
+
+        idempotencyResultCache.evict(updated.getIdempotencyKey());
 
         return updated;
     }

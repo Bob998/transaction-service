@@ -37,6 +37,10 @@ public class TransactionRepository {
         return transactionMapper.findByTransactionNo(transactionNo);
     }
 
+    public Optional<Transaction> findByIdempotencyKey(String idempotencyKey) {
+        return transactionMapper.findByIdempotencyKey(idempotencyKey);
+    }
+
     public Transaction updateStatus(Transaction transaction) {
         int updatedRows = transactionMapper.updateStatus(transaction);
 

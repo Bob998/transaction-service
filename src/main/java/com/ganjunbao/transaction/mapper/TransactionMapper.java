@@ -5,6 +5,7 @@ import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Result;
 import org.apache.ibatis.annotations.Results;
+import org.apache.ibatis.annotations.ResultMap;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
@@ -89,6 +90,25 @@ public interface TransactionMapper {
             )
     })
     Optional<Transaction> findByTransactionNo(String transactionNo);
+
+    @Select("""
+            SELECT
+                id AS database_id,
+                transaction_no,
+                idempotency_key,
+                channel_id,
+                amount,
+                currency,
+                description,
+                status,
+                version,
+                created_at,
+                updated_at
+            FROM payment_transaction
+            WHERE idempotency_key = #{idempotencyKey}
+            """)
+    @ResultMap("transactionResultMap")
+    Optional<Transaction> findByIdempotencyKey(String idempotencyKey);
 
     @Update("""
             UPDATE payment_transaction

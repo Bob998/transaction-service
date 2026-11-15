@@ -14,6 +14,18 @@ public class PaymentChannel {
     public PaymentChannel() {
     }
 
+    public PaymentChannel(
+            Long id,
+            String channelCode,
+            String channelName,
+            ChannelStatus status
+    ) {
+        this.id = id;
+        this.channelCode = channelCode;
+        this.channelName = channelName;
+        this.status = status;
+    }
+
     public Long getId() {
         return id;
     }
