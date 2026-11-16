@@ -45,7 +45,7 @@ class TransactionRollbackIntegrationTest extends PostgresContainerTest {
         try {
             assertEquals(TransactionStatus.CREATED, created.getStatus());
             assertEquals(
-                    0,
+                    1,
                     outboxEventRepository.countByAggregateId(created.getId())
             );
 
@@ -65,10 +65,15 @@ class TransactionRollbackIntegrationTest extends PostgresContainerTest {
             );
 
             assertEquals(
-                    0,
+                    1,
                     outboxEventRepository.countByAggregateId(created.getId())
             );
         } finally {
+            jdbcTemplate.update(
+                    "DELETE FROM outbox_event WHERE aggregate_id = ?",
+                    created.getId()
+            );
+
             jdbcTemplate.update(
                     "DELETE FROM payment_transaction WHERE transaction_no = ?",
                     created.getId()

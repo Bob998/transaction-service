@@ -20,7 +20,13 @@ public class TransactionRepository {
 
     public Transaction insert(Transaction transaction) {
         try {
-            transactionMapper.insert(transaction);
+            int insertedRows = transactionMapper.insert(transaction);
+
+            if (insertedRows == 0) {
+                throw new DuplicateIdempotencyKeyException(
+                        transaction.getIdempotencyKey()
+                );
+            }
         } catch (DuplicateKeyException exception) {
             throw new DuplicateIdempotencyKeyException(
                     transaction.getIdempotencyKey()

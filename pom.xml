@@ -39,6 +39,17 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
+        <!-- 健康检查与Kafka、JVM等运行指标 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka</artifactId>
+        </dependency>
+
         <!-- Redis：限流、额度计数、滑动窗口与短期缓存 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -144,6 +155,15 @@
                     <systemPropertyVariables>
                         <!-- Docker Engine 29 requires a newer API than docker-java's default. -->
                         <api.version>1.44</api.version>
+
+                        <!-- 普通测试不启动真实Kafka消费者。 -->
+                        <spring.kafka.listener.auto-startup>false</spring.kafka.listener.auto-startup>
+
+                        <!-- 普通测试不连接Broker自动创建Topic。 -->
+                        <spring.kafka.admin.auto-create>false</spring.kafka.admin.auto-create>
+
+                        <!-- 普通测试不运行Outbox定时发布。 -->
+                        <transaction.outbox.publisher-enabled>false</transaction.outbox.publisher-enabled>
                     </systemPropertyVariables>
                 </configuration>
             </plugin>

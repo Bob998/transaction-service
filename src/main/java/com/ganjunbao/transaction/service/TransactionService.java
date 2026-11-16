@@ -57,10 +57,12 @@ public class TransactionService {
         this.channelQuotaGuard = channelQuotaGuard;
     }
 
+    @Transactional
     public Transaction create(CreateTransactionRequest request) {
         return create(request, null);
     }
 
+    @Transactional
     public Transaction create(CreateTransactionRequest request, String userId) {
         Transaction cachedTransaction = idempotencyResultCache
                 .get(request.getIdempotencyKey())
@@ -101,13 +103,30 @@ public class TransactionService {
         );
 
         Transaction createdTransaction;
+        boolean newlyCreated;
+
         try {
             createdTransaction = transactionRepository.insert(transaction);
+            newlyCreated = true;
         } catch (DuplicateIdempotencyKeyException exception) {
             createdTransaction = transactionRepository
                     .findByIdempotencyKey(request.getIdempotencyKey())
                     .orElseThrow(() -> exception);
+
+            newlyCreated = false;
         }
+
+        if (newlyCreated) {
+            outboxEventRepository.record(
+                    "TRANSACTION",
+                    createdTransaction.getId(),
+                    "TRANSACTION_CREATED",
+                    "{\"transactionId\":\""
+                            + createdTransaction.getId()
+                            + "\",\"status\":\"CREATED\"}"
+            );
+        }
+
         idempotencyResultCache.put(createdTransaction);
         return createdTransaction;
     }

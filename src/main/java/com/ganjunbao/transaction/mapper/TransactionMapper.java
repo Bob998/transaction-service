@@ -39,6 +39,7 @@ public interface TransactionMapper {
                 #{createdAt},
                 #{updatedAt}
             )
+            ON CONFLICT (idempotency_key) DO NOTHING
             """)
     int insert(Transaction transaction);
 

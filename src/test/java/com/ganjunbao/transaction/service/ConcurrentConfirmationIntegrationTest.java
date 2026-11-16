@@ -108,7 +108,7 @@ class ConcurrentConfirmationIntegrationTest extends PostgresContainerTest {
             );
 
             assertEquals(
-                    1,
+                    2,
                     outboxEventRepository.countByAggregateId(
                             finalTransaction.getId()
                     )

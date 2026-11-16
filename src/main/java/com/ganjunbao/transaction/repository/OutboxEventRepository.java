@@ -5,6 +5,7 @@ import com.ganjunbao.transaction.model.OutboxEvent;
 import org.springframework.stereotype.Repository;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 
 @Repository
 public class OutboxEventRepository {
@@ -34,5 +35,35 @@ public class OutboxEventRepository {
 
     public int countByAggregateId(String aggregateId) {
         return outboxEventMapper.countByAggregateId(aggregateId);
+    }
+
+    public List<OutboxEvent> claimPending(int limit) {
+        return outboxEventMapper.claimPending(limit);
+    }
+
+    public void markPublished(Long eventId) {
+        int updatedRows = outboxEventMapper.markPublished(eventId);
+
+        if (updatedRows != 1) {
+            throw new IllegalStateException(
+                    "Outbox事件状态更新失败，eventId=" + eventId
+            );
+        }
+    }
+
+    public void markPublishFailed(
+            Long eventId,
+            String errorMessage
+    ) {
+        int updatedRows = outboxEventMapper.markPublishFailed(
+                eventId,
+                errorMessage
+        );
+
+        if (updatedRows != 1) {
+            throw new IllegalStateException(
+                    "Outbox事件失败状态更新失败，eventId=" + eventId
+            );
+        }
     }
 }
