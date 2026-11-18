@@ -17,6 +17,7 @@ public class Transaction {
     private OffsetDateTime updatedAt;
     private Long databaseId;
     private Long version = 0L;
+    private String userId;
 
     public Transaction() {}
 
@@ -39,8 +40,35 @@ public class Transaction {
             OffsetDateTime createdAt,
             OffsetDateTime updatedAt
     ) {
+        this(
+                id,
+                idempotencyKey,
+                null,
+                channelId,
+                amount,
+                currency,
+                description,
+                status,
+                createdAt,
+                updatedAt
+        );
+    }
+
+    public Transaction(
+            String id,
+            String idempotencyKey,
+            String userId,
+            Long channelId,
+            BigDecimal amount,
+            String currency,
+            String description,
+            TransactionStatus status,
+            OffsetDateTime createdAt,
+            OffsetDateTime updatedAt
+    ) {
         this.id = id;
         this.idempotencyKey = idempotencyKey;
+        this.userId = userId;
         this.channelId = channelId;
         this.amount = amount;
         this.currency = currency;
@@ -113,5 +141,9 @@ public class Transaction {
 
     public void cancel() {
         this.status = TransactionStatus.CANCELLED;
+    }
+
+    public String getUserId() {
+        return userId;
     }
 }

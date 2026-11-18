@@ -8,6 +8,7 @@ import com.ganjunbao.transaction.repository.OutboxEventRepository;
 import com.ganjunbao.transaction.repository.PaymentChannelRepository;
 import com.ganjunbao.transaction.repository.TransactionAttemptRepository;
 import com.ganjunbao.transaction.repository.TransactionRepository;
+import com.ganjunbao.transaction.repository.LedgerEntryRepository;
 import com.ganjunbao.transaction.redis.IdempotencyResultCache;
 import com.ganjunbao.transaction.redis.RiskSlidingWindowService;
 import org.junit.jupiter.api.BeforeEach;
@@ -53,6 +54,9 @@ class TransactionServiceMockitoTest {
 
     @Mock
     private ChannelQuotaGuard channelQuotaGuard;
+
+    @Mock
+    private LedgerEntryRepository ledgerEntryRepository;
 
     @InjectMocks
     private TransactionService transactionService;

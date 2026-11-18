@@ -25,6 +25,7 @@ public interface TransactionMapper {
                 status,
                 version,
                 created_at,
+                user_id,
                 updated_at
             )
             VALUES (
@@ -37,6 +38,7 @@ public interface TransactionMapper {
                 #{status},
                 #{version},
                 #{createdAt},
+                #{userId},
                 #{updatedAt}
             )
             ON CONFLICT (idempotency_key) DO NOTHING
@@ -55,6 +57,7 @@ public interface TransactionMapper {
                 status,
                 version,
                 created_at,
+                user_id,
                 updated_at
             FROM payment_transaction
             WHERE transaction_no = #{transactionNo}
@@ -82,6 +85,10 @@ public interface TransactionMapper {
                     property = "createdAt"
             ),
             @Result(
+                    column = "user_id",
+                    property = "userId"
+            ),
+            @Result(
                     column = "updated_at",
                     property = "updatedAt"
             ),
@@ -104,6 +111,7 @@ public interface TransactionMapper {
                 status,
                 version,
                 created_at,
+                user_id,
                 updated_at
             FROM payment_transaction
             WHERE idempotency_key = #{idempotencyKey}
@@ -120,4 +128,34 @@ public interface TransactionMapper {
               AND version = #{version}
             """)
     int updateStatus(Transaction transaction);
+
+    @Select("""
+        SELECT COALESCE(SUM(amount), 0)
+        FROM payment_transaction
+        WHERE user_id = #{userId}
+          AND created_at >= CURRENT_DATE
+          AND created_at < CURRENT_DATE + INTERVAL '1 day'
+          AND status NOT IN ('FAILED', 'CANCELLED')
+        """)
+    java.math.BigDecimal sumDailyAmount(String userId);
+
+    @Select("""
+        SELECT COUNT(*)
+        FROM payment_transaction
+        WHERE user_id = #{userId}
+          AND created_at >=
+              CURRENT_TIMESTAMP - INTERVAL '10 minutes'
+          AND status <> 'CANCELLED'
+        """)
+    long countRecentTransactions(String userId);
+
+    @Select("""
+        SELECT COUNT(*)
+        FROM payment_transaction
+        WHERE user_id = #{userId}
+          AND created_at >=
+              CURRENT_TIMESTAMP - INTERVAL '24 hours'
+          AND status = 'FAILED'
+        """)
+    long countRecentFailures(String userId);
 }

@@ -45,6 +45,27 @@ public class TransactionAttemptRepository {
         transactionAttemptMapper.insert(attempt);
     }
 
+    public void recordUnknownTimeout(Transaction transaction) {
+        int attemptNo = transactionAttemptMapper
+                .findNextAttemptNo(transaction.getDatabaseId());
+        OffsetDateTime now = OffsetDateTime.now();
+
+        TransactionAttempt attempt = new TransactionAttempt(
+                transaction.getDatabaseId(),
+                transaction.getChannelId(),
+                attemptNo,
+                TransactionAttemptStatus.UNKNOWN,
+                "{\"action\":\"PAYMENT_CONFIRM\"}",
+                null,
+                "GATEWAY_TIMEOUT",
+                "支付请求超时，结果未知，禁止自动重试",
+                now,
+                now
+        );
+
+        transactionAttemptMapper.insert(attempt);
+    }
+
     public List<TransactionAttempt> findByTransactionId(
             Long transactionId
     ) {

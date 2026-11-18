@@ -2,6 +2,7 @@ package com.ganjunbao.transaction.mapper;
 
 import com.ganjunbao.transaction.model.Transaction;
 
+import java.math.BigDecimal;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -43,5 +44,20 @@ public class InMemoryTransactionMapper implements TransactionMapper {
 
         storage.put(transaction.getId(), transaction);
         return 1;
+    }
+
+    @Override
+    public BigDecimal sumDailyAmount(String userId) {
+        return BigDecimal.ZERO;
+    }
+
+    @Override
+    public long countRecentTransactions(String userId) {
+        return 0;
+    }
+
+    @Override
+    public long countRecentFailures(String userId) {
+        return 0;
     }
 }

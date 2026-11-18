@@ -85,6 +85,18 @@ public class ChannelRouteCache {
         }
     }
 
+    public void evict(String channelCode) {
+        try {
+            redisTemplate.delete(key(channelCode));
+        } catch (DataAccessException exception) {
+            LOGGER.warn(
+                    "删除通道路由缓存失败，等待缓存自然过期，channelCode={}",
+                    channelCode,
+                    exception
+            );
+        }
+    }
+
     private String key(String channelCode) {
         return "route:channel:" + channelCode;
     }

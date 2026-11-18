@@ -41,4 +41,21 @@ public class AuditLogRepository {
     ) {
         return auditLogMapper.findByTransactionId(transactionId);
     }
+
+    public void recordAction(
+            Long transactionId,
+            String action,
+            String operator,
+            String oldValue,
+            String newValue
+    ) {
+        auditLogMapper.insert(new AuditLog(
+                transactionId,
+                action,
+                operator,
+                oldValue,
+                newValue,
+                OffsetDateTime.now()
+        ));
+    }
 }

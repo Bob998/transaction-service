@@ -7,6 +7,7 @@ import com.ganjunbao.transaction.model.Transaction;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 
 @Repository
@@ -60,5 +61,17 @@ public class TransactionRepository {
                 .orElseThrow(() ->
                         new IllegalStateException("交易更新后无法查询")
                 );
+    }
+
+    public BigDecimal sumDailyAmount(String userId) {
+        return transactionMapper.sumDailyAmount(userId);
+    }
+
+    public long countRecentTransactions(String userId) {
+        return transactionMapper.countRecentTransactions(userId);
+    }
+
+    public long countRecentFailures(String userId) {
+        return transactionMapper.countRecentFailures(userId);
     }
 }

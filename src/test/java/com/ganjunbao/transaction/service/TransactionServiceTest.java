@@ -12,8 +12,11 @@ import com.ganjunbao.transaction.repository.AuditLogRepository;
 import com.ganjunbao.transaction.repository.TransactionAttemptRepository;
 import com.ganjunbao.transaction.repository.TransactionRepository;
 import com.ganjunbao.transaction.repository.OutboxEventRepository;
+import com.ganjunbao.transaction.repository.UserRiskProfileRepository;
+import com.ganjunbao.transaction.repository.LedgerEntryRepository;
 import com.ganjunbao.transaction.redis.IdempotencyResultCache;
 import com.ganjunbao.transaction.redis.RiskSlidingWindowService;
+import com.ganjunbao.transaction.risk.RiskAssessmentService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -46,6 +49,7 @@ public class TransactionServiceTest {
 
         PaymentChannel paymentChannel = mock(PaymentChannel.class);
         when(paymentChannel.getId()).thenReturn(1L);
+        when(paymentChannel.getChannelCode()).thenReturn("DEMO");
 
         PaymentChannelRepository paymentChannelRepository =
                 mock(PaymentChannelRepository.class);
@@ -72,6 +76,25 @@ public class TransactionServiceTest {
         ChannelQuotaGuard channelQuotaGuard =
                 mock(ChannelQuotaGuard.class);
 
+        DynamicChannelRouter dynamicChannelRouter =
+                mock(DynamicChannelRouter.class);
+        when(dynamicChannelRouter.select(anyString(),
+                org.mockito.ArgumentMatchers.any(BigDecimal.class)))
+                .thenReturn(new ChannelRouteDecision(
+                        paymentChannel,
+                        BigDecimal.ZERO,
+                        BigDecimal.ZERO
+                ));
+
+        UserRiskProfileRepository userRiskProfileRepository =
+                mock(UserRiskProfileRepository.class);
+
+        RiskAssessmentService riskAssessmentService =
+                mock(RiskAssessmentService.class);
+
+        LedgerEntryRepository ledgerEntryRepository =
+                mock(LedgerEntryRepository.class);
+
         transactionService = new TransactionService(
                 transactionRepository,
                 paymentChannelRepository,
@@ -80,7 +103,11 @@ public class TransactionServiceTest {
                 outboxEventRepository,
                 idempotencyResultCache,
                 riskSlidingWindowService,
-                channelQuotaGuard
+                channelQuotaGuard,
+                dynamicChannelRouter,
+                userRiskProfileRepository,
+                riskAssessmentService,
+                ledgerEntryRepository
         );
     }
 

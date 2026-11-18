@@ -8,4 +8,8 @@ public class RiskRejectedException extends RuntimeException {
         super("交易触发风控限制，窗口内笔数=" + transactionCount
                 + "，累计金额=" + totalAmount);
     }
+
+    public RiskRejectedException(String message) {
+        super(message);
+    }
 }

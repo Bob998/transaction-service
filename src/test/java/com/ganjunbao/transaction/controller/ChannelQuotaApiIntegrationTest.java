@@ -38,8 +38,18 @@ class ChannelQuotaApiIntegrationTest extends PostgresContainerTest {
                 .toUpperCase(Locale.ROOT);
         jdbcTemplate.update(
                 """
-                INSERT INTO payment_channel (channel_code, channel_name, status)
-                VALUES (?, ?, 'ACTIVE')
+                INSERT INTO payment_channel (
+                    channel_code,
+                    channel_name,
+                    status,
+                    health_status,
+                    priority,
+                    fixed_cost,
+                    cost_rate,
+                    success_rate,
+                    supported_currency
+                )
+                VALUES (?, ?, 'ACTIVE', 'HEALTHY', 0, 0, 0, 1, 'QTA')
                 """,
                 channelCode,
                 "API额度测试通道"
@@ -109,7 +119,7 @@ class ChannelQuotaApiIntegrationTest extends PostgresContainerTest {
                   "amount": %s,
                   "description": "API通道额度测试",
                   "idempotencyKey": "%s",
-                  "currency": "CNY",
+                  "currency": "QTA",
                   "channelCode": "%s"
                 }
                 """.formatted(amount, idempotencyKey, channelCode);

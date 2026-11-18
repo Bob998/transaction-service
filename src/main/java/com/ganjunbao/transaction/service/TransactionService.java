@@ -1,7 +1,6 @@
 package com.ganjunbao.transaction.service;
 
 import com.ganjunbao.transaction.dto.CreateTransactionRequest;
-import com.ganjunbao.transaction.exception.ChannelNotAvailableException;
 import com.ganjunbao.transaction.exception.DuplicateIdempotencyKeyException;
 import com.ganjunbao.transaction.exception.InvalidTransactionStateException;
 import com.ganjunbao.transaction.exception.RiskControlUnavailableException;
@@ -15,13 +14,20 @@ import com.ganjunbao.transaction.repository.OutboxEventRepository;
 import com.ganjunbao.transaction.repository.PaymentChannelRepository;
 import com.ganjunbao.transaction.repository.TransactionAttemptRepository;
 import com.ganjunbao.transaction.repository.TransactionRepository;
+import com.ganjunbao.transaction.repository.UserRiskProfileRepository;
+import com.ganjunbao.transaction.repository.LedgerEntryRepository;
 import com.ganjunbao.transaction.redis.IdempotencyResultCache;
 import com.ganjunbao.transaction.redis.RiskSlidingWindowService;
 import com.ganjunbao.transaction.redis.RiskWindowResult;
+import com.ganjunbao.transaction.risk.RiskAssessment;
+import com.ganjunbao.transaction.risk.RiskAssessmentService;
+import com.ganjunbao.transaction.risk.RiskContext;
+import com.ganjunbao.transaction.risk.UserRiskProfile;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.Locale;
 import java.util.UUID;
@@ -36,6 +42,10 @@ public class TransactionService {
     private final IdempotencyResultCache idempotencyResultCache;
     private final RiskSlidingWindowService riskSlidingWindowService;
     private final ChannelQuotaGuard channelQuotaGuard;
+    private final DynamicChannelRouter dynamicChannelRouter;
+    private final UserRiskProfileRepository userRiskProfileRepository;
+    private final RiskAssessmentService riskAssessmentService;
+    private final LedgerEntryRepository ledgerEntryRepository;
 
     public TransactionService(
             TransactionRepository transactionRepository,
@@ -45,7 +55,11 @@ public class TransactionService {
             OutboxEventRepository outboxEventRepository,
             IdempotencyResultCache idempotencyResultCache,
             RiskSlidingWindowService riskSlidingWindowService,
-            ChannelQuotaGuard channelQuotaGuard
+            ChannelQuotaGuard channelQuotaGuard,
+            DynamicChannelRouter dynamicChannelRouter,
+            UserRiskProfileRepository userRiskProfileRepository,
+            RiskAssessmentService riskAssessmentService,
+            LedgerEntryRepository ledgerEntryRepository
     ) {
         this.transactionRepository = transactionRepository;
         this.paymentChannelRepository = paymentChannelRepository;
@@ -55,6 +69,10 @@ public class TransactionService {
         this.idempotencyResultCache = idempotencyResultCache;
         this.riskSlidingWindowService = riskSlidingWindowService;
         this.channelQuotaGuard = channelQuotaGuard;
+        this.dynamicChannelRouter = dynamicChannelRouter;
+        this.userRiskProfileRepository = userRiskProfileRepository;
+        this.riskAssessmentService = riskAssessmentService;
+        this.ledgerEntryRepository = ledgerEntryRepository;
     }
 
     @Transactional
@@ -71,16 +89,22 @@ public class TransactionService {
             return cachedTransaction;
         }
 
-        evaluateRiskWhenUserIsKnown(userId, request);
+        Transaction existingTransaction = transactionRepository
+                .findByIdempotencyKey(request.getIdempotencyKey())
+                .orElse(null);
+        if (existingTransaction != null) {
+            idempotencyResultCache.put(existingTransaction);
+            return existingTransaction;
+        }
 
-        String channelCode = request.getChannelCode()
-                .toUpperCase(Locale.ROOT);
+        evaluateConfigurableRisk(userId, request);
 
-        PaymentChannel channel = paymentChannelRepository
-                .findActiveByCode(channelCode)
-                .orElseThrow(() ->
-                        new ChannelNotAvailableException(channelCode)
-                );
+        ChannelRouteDecision routeDecision = dynamicChannelRouter.select(
+                request.getCurrency().toUpperCase(Locale.ROOT),
+                request.getAmount()
+        );
+        PaymentChannel channel = routeDecision.channel();
+        String channelCode = channel.getChannelCode();
 
         channelQuotaGuard.reserve(
                 channelCode,
@@ -93,6 +117,7 @@ public class TransactionService {
         Transaction transaction = new Transaction(
                 "TXN-" + UUID.randomUUID(),
                 request.getIdempotencyKey(),
+                userId,
                 channel.getId(),
                 request.getAmount(),
                 request.getCurrency().toUpperCase(Locale.ROOT),
@@ -131,7 +156,7 @@ public class TransactionService {
         return createdTransaction;
     }
 
-    private void evaluateRiskWhenUserIsKnown(
+    private void evaluateConfigurableRisk(
             String userId,
             CreateTransactionRequest request
     ) {
@@ -139,9 +164,9 @@ public class TransactionService {
             return;
         }
 
-        RiskWindowResult riskResult;
+        RiskWindowResult windowResult;
         try {
-            riskResult = riskSlidingWindowService.evaluateAndRecord(
+            windowResult = riskSlidingWindowService.evaluateAndRecord(
                     userId,
                     request.getIdempotencyKey(),
                     request.getAmount()
@@ -150,10 +175,48 @@ public class TransactionService {
             throw new RiskControlUnavailableException(exception);
         }
 
-        if (!riskResult.allowed()) {
+        if (!windowResult.allowed()) {
             throw new RiskRejectedException(
-                    riskResult.transactionCount(),
-                    riskResult.totalAmount()
+                    windowResult.transactionCount(),
+                    windowResult.totalAmount()
+            );
+        }
+
+        UserRiskProfile profile =
+                userRiskProfileRepository.findOrDefault(userId);
+        BigDecimal dailyAmount =
+                transactionRepository.sumDailyAmount(userId);
+        long recentTransactionCount = Math.max(
+                windowResult.transactionCount(),
+                transactionRepository.countRecentTransactions(userId)
+        );
+        long recentFailureCount =
+                transactionRepository.countRecentFailures(userId);
+
+        RiskContext context = new RiskContext(
+                request.getIdempotencyKey(),
+                userId,
+                profile.getUserLevel(),
+                request.getAmount(),
+                request.getCurrency().toUpperCase(Locale.ROOT),
+                dailyAmount,
+                profile.getDailyLimit(),
+                recentTransactionCount,
+                recentFailureCount
+        );
+
+        RiskAssessment assessment =
+                riskAssessmentService.evaluateAndRecord(context);
+
+        if (assessment.rejected()) {
+            throw new RiskRejectedException(
+                    "交易被Aviator风控规则拒绝，userId=" + userId
+            );
+        }
+
+        if (assessment.requiresReview()) {
+            throw new RiskRejectedException(
+                    "交易需要人工审核，userId=" + userId
             );
         }
     }
@@ -277,6 +340,9 @@ public class TransactionService {
         transaction.succeed();
 
         Transaction updated = transactionRepository.updateStatus(transaction);
+
+        // 状态更新和账务流水受同一个 @Transactional 事务保护。
+        ledgerEntryRepository.recordPayment(updated);
 
         transactionAttemptRepository.recordSuccess(
                 updated,

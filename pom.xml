@@ -39,6 +39,12 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>com.googlecode.aviator</groupId>
+            <artifactId>aviator</artifactId>
+            <version>5.4.3</version>
+        </dependency>
+
         <!-- 健康检查与Kafka、JVM等运行指标 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
