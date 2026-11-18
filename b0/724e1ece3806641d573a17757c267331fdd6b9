@@ -1,0 +1,35 @@
+.dockerignore
+  h_f973ca68e14391 1-8
+.env.example
+  h_f973ca68e14391 1-7
+.github/workflows/ci.yml
+  h_f973ca68e14391 1-64
+.gitignore
+  h_f973ca68e14391 34-39
+Dockerfile
+  h_f973ca68e14391 1-41
+README.md
+  h_f973ca68e14391 30,33-35,38,40-46,51,58-63,65-66,69,82-101
+compose.yaml
+  h_f973ca68e14391 2-41,46-48,56,86-87,89-91,102
+config/checkstyle.xml
+  h_f973ca68e14391 1-14
+docs/WEEK8_DOCKER_CI.md
+  h_f973ca68e14391 1-47
+pom.xml
+  h_f973ca68e14391 180-198
+src/main/resources/application.properties
+  h_f973ca68e14391 93-96
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.6",
+  "base_commit_sha": "b0724e1ece3806641d573a17757c267331fdd6b9",
+  "prompts": {},
+  "logical_commit_id": "b0724e1ece3806641d573a17757c267331fdd6b9",
+  "humans": {
+    "h_f973ca68e14391": {
+      "author": "ganjunbao <ganjunbao@bigo.sg>"
+    }
+  }
+}
