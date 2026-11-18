@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test-quality-image:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+
+      - name: Compile, test and static checks
+        run: ./mvnw --batch-mode --no-transfer-progress verify
+
+      - name: Upload test and coverage reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: |
+            target/surefire-reports/
+            target/site/jacoco/
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Validate Compose configuration
+        run: docker compose config --quiet
+
+      - name: Build versioned application image
+        env:
+          IMAGE_VERSION: ${{ github.sha }}
+        run: |
+          SHORT_SHA="${IMAGE_VERSION:0:12}"
+          docker build \
+            --build-arg APP_VERSION="${IMAGE_VERSION}" \
+            --tag "transaction-service:${SHORT_SHA}" \
+            .
+
+      - name: Verify image runs as non-root
+        env:
+          IMAGE_VERSION: ${{ github.sha }}
+        run: |
+          SHORT_SHA="${IMAGE_VERSION:0:12}"
+          test "$(docker image inspect "transaction-service:${SHORT_SHA}" --format '{{.Config.User}}')" = "10001:10001"

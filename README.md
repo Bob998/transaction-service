@@ -27,19 +27,28 @@
 - Flyway
 - Docker Compose
 
-## 启动 PostgreSQL
+## Docker Compose 一键启动
 
 ```bash
-docker compose up -d
+git clone <repository-url>
+cd transaction-service
+docker compose up --build -d
 ```
 
-检查数据库状态：
+该命令会构建应用镜像并启动：
+
+- transaction-app（Spring Boot）
+- transaction-postgres（PostgreSQL）
+- transaction-redis（Redis）
+- transaction-kafka（Kafka）
+
+检查全部服务状态：
 
 ```bash
 docker compose ps
 ```
 
-状态显示 `healthy` 后即可启动应用。停止数据库使用：
+状态全部显示 `healthy` 后，应用可通过 `http://localhost:8080` 访问。停止服务：
 
 ```bash
 docker compose down
@@ -47,9 +56,17 @@ docker compose down
 
 默认使用 Docker volume 保存数据，普通的 `docker compose down` 不会删除数据库内容。
 
+如需修改密码、端口或镜像版本，复制环境变量模板：
+
+```bash
+cp .env.example .env
+```
+
+Compose 中的应用通过容器服务名访问依赖，宿主机仍可通过 `localhost` 访问端口。
+
 ## 运行测试
 
-先确保 PostgreSQL 容器处于健康状态，然后运行：
+测试使用 Testcontainers 自动启动隔离的 PostgreSQL 和 Redis：
 
 ```bash
 ./mvnw test
@@ -62,6 +79,26 @@ docker compose down
 ```
 
 应用启动时，Flyway 会自动校验并执行尚未应用的数据库迁移。
+
+## CI 流水线
+
+GitHub Actions 在每次 push 和 pull request 时自动执行：
+
+```text
+编译 → 自动测试 → Checkstyle静态检查 → Compose校验 → 构建版本化镜像 → 非root校验
+```
+
+本地执行同一质量门禁：
+
+```bash
+./mvnw verify
+```
+
+CI 镜像使用 Git commit SHA 的前12位作为标签，例如：
+
+```text
+transaction-service:a1b2c3d4e5f6
+```
 
 服务默认运行在：
 
