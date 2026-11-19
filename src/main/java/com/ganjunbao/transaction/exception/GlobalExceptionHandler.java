@@ -13,6 +13,34 @@ import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+    @ExceptionHandler(PerformanceLabDisabledException.class)
+    public ResponseEntity<ErrorResponse> handlePerformanceLabDisabled(
+            PerformanceLabDisabledException exception
+    ) {
+        ErrorResponse response = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.FORBIDDEN.value(),
+                "PERFORMANCE_LAB_DISABLED",
+                exception.getMessage(),
+                Map.of()
+        );
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+    }
+
+    @ExceptionHandler(PerformanceLabRequestException.class)
+    public ResponseEntity<ErrorResponse> handlePerformanceLabRequest(
+            PerformanceLabRequestException exception
+    ) {
+        ErrorResponse response = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.BAD_REQUEST.value(),
+                "INVALID_PERFORMANCE_LAB_REQUEST",
+                exception.getMessage(),
+                Map.of()
+        );
+        return ResponseEntity.badRequest().body(response);
+    }
+
     @ExceptionHandler(TransactionNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleTransactionNotFound(TransactionNotFoundException exception) {
         ErrorResponse response = new ErrorResponse(

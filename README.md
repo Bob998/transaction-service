@@ -226,3 +226,14 @@ flowchart LR
 
 指标设计和慢通道熔断实验见
 [第9周可观测性文档](docs/WEEK9_OBSERVABILITY.md)。
+
+## 第10周：JMeter、JVM与线程池调优
+
+- 参数化JMeter交易全链路压测；
+- 线程池耗尽、队列积压、数据库连接池耗尽、慢SQL实验；
+- 受上限保护的内存增长与CPU压力实验；
+- G1 GC、Tomcat、Hikari、CPU、GC和自定义线程池指标；
+- 容器内置 `jcmd`、`jstack`、`jmap`、`top` 与 `ps`；
+- 优化前后使用同一负载复测并记录新的系统容量边界。
+
+详见 [第10周容量与调优报告](docs/WEEK10_PERFORMANCE_TUNING.md)。

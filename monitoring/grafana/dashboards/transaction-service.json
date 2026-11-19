@@ -27,18 +27,18 @@
       ]
     },
     {
-      "title": "通道 P99 延迟",
+      "title": "通道 P99 延迟（启动以来）",
       "type": "timeseries",
       "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
       "fieldConfig": {"defaults": {"unit": "s"}},
-      "targets": [{"expr": "histogram_quantile(0.99, sum by (le, channel) (rate(business_channel_request_duration_seconds_bucket[2m])))", "legendFormat": "{{channel}}"}]
+      "targets": [{"expr": "histogram_quantile(0.99, sum by (le, channel) (business_channel_request_duration_seconds_bucket))", "legendFormat": "{{channel}}"}]
     },
     {
-      "title": "通道调用成功率",
+      "title": "通道调用成功率（启动以来）",
       "type": "timeseries",
       "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
       "fieldConfig": {"defaults": {"unit": "percentunit", "min": 0, "max": 1}},
-      "targets": [{"expr": "(sum by (channel) (rate(business_channel_request_duration_seconds_count{outcome=\"success\"}[2m])) or (0 * sum by (channel) (rate(business_channel_request_duration_seconds_count[2m])))) / sum by (channel) (rate(business_channel_request_duration_seconds_count[2m]))", "legendFormat": "{{channel}}"}]
+      "targets": [{"expr": "(sum by (channel) (business_channel_request_duration_seconds_count{outcome=\"success\"}) or (0 * sum by (channel) (business_channel_request_duration_seconds_count))) / sum by (channel) (business_channel_request_duration_seconds_count)", "legendFormat": "{{channel}}"}]
     },
     {
       "title": "通道熔断状态",
@@ -102,15 +102,71 @@
       "type": "stat",
       "gridPos": {"h": 6, "w": 6, "x": 6, "y": 30},
       "targets": [{"expr": "sum(business_reconciliation_differences_total)", "legendFormat": "differences"}]
+    },
+    {
+      "title": "性能实验线程池",
+      "type": "timeseries",
+      "gridPos": {"h": 7, "w": 8, "x": 0, "y": 36},
+      "targets": [
+        {"expr": "performance_lab_executor_active", "legendFormat": "{{pool}} active"},
+        {"expr": "performance_lab_executor_pool_size", "legendFormat": "{{pool}} size"}
+      ]
+    },
+    {
+      "title": "性能实验队列积压",
+      "type": "timeseries",
+      "gridPos": {"h": 7, "w": 8, "x": 8, "y": 36},
+      "targets": [
+        {"expr": "performance_lab_executor_queue_size", "legendFormat": "{{pool}} queued"}
+      ]
+    },
+    {
+      "title": "实验SQL P99",
+      "type": "timeseries",
+      "gridPos": {"h": 7, "w": 8, "x": 16, "y": 36},
+      "fieldConfig": {"defaults": {"unit": "s"}},
+      "targets": [
+        {"expr": "histogram_quantile(0.99, sum by (le) (rate(performance_lab_database_query_duration_seconds_bucket[2m])))", "legendFormat": "P99"}
+      ]
+    },
+    {
+      "title": "进程 / 系统 CPU",
+      "type": "timeseries",
+      "gridPos": {"h": 7, "w": 8, "x": 0, "y": 43},
+      "fieldConfig": {"defaults": {"unit": "percentunit", "min": 0, "max": 1}},
+      "targets": [
+        {"expr": "process_cpu_usage", "legendFormat": "process"},
+        {"expr": "system_cpu_usage", "legendFormat": "system"}
+      ]
+    },
+    {
+      "title": "GC暂停",
+      "type": "timeseries",
+      "gridPos": {"h": 7, "w": 8, "x": 8, "y": 43},
+      "fieldConfig": {"defaults": {"unit": "s"}},
+      "targets": [
+        {"expr": "jvm_gc_pause_seconds_max", "legendFormat": "max"},
+        {"expr": "rate(jvm_gc_pause_seconds_sum[2m]) / clamp_min(rate(jvm_gc_pause_seconds_count[2m]), 0.001)", "legendFormat": "average"}
+      ]
+    },
+    {
+      "title": "实验保留内存",
+      "type": "timeseries",
+      "gridPos": {"h": 7, "w": 8, "x": 16, "y": 43},
+      "fieldConfig": {"defaults": {"unit": "bytes"}},
+      "targets": [
+        {"expr": "performance_lab_memory_retained_bytes", "legendFormat": "retained"},
+        {"expr": "sum(jvm_memory_used_bytes)", "legendFormat": "JVM used"}
+      ]
     }
   ],
   "refresh": "5s",
   "schemaVersion": 41,
-  "tags": ["transaction", "week9"],
+  "tags": ["transaction", "week9", "week10"],
   "templating": {"list": []},
   "time": {"from": "now-15m", "to": "now"},
   "timezone": "browser",
   "title": "Transaction Service - Production Troubleshooting",
   "uid": "transaction-service-week9",
-  "version": 3
+  "version": 6
 }

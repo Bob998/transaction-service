@@ -2,6 +2,7 @@ package com.ganjunbao.transaction.controller;
 
 import com.ganjunbao.transaction.gateway.GatewayFaultSimulator;
 import com.ganjunbao.transaction.observability.ChannelCircuitBreaker;
+import com.ganjunbao.transaction.observability.PerformanceLabService;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,13 +19,16 @@ public class OperationsController {
 
     private final GatewayFaultSimulator faultSimulator;
     private final ChannelCircuitBreaker circuitBreaker;
+    private final PerformanceLabService performanceLabService;
 
     public OperationsController(
             GatewayFaultSimulator faultSimulator,
-            ChannelCircuitBreaker circuitBreaker
+            ChannelCircuitBreaker circuitBreaker,
+            PerformanceLabService performanceLabService
     ) {
         this.faultSimulator = faultSimulator;
         this.circuitBreaker = circuitBreaker;
+        this.performanceLabService = performanceLabService;
     }
 
     @PostMapping("/channels/{channelCode}/fault")
@@ -52,5 +56,59 @@ public class OperationsController {
                 "faults", faultSimulator.all(),
                 "circuits", circuitBreaker.snapshots()
         );
+    }
+
+    @PostMapping("/performance/thread-pool")
+    public PerformanceLabService.PressureSubmission threadPoolPressure(
+            @RequestParam(defaultValue = "40") int tasks,
+            @RequestParam(defaultValue = "5000") long durationMs
+    ) {
+        return performanceLabService.submitThreadPressure(
+                tasks,
+                durationMs
+        );
+    }
+
+    @PostMapping("/performance/database-pool")
+    public PerformanceLabService.PressureSubmission databasePoolPressure(
+            @RequestParam(defaultValue = "20") int tasks,
+            @RequestParam(defaultValue = "5000") long durationMs
+    ) {
+        return performanceLabService.submitDatabasePressure(
+                tasks,
+                durationMs
+        );
+    }
+
+    @PostMapping("/performance/slow-query")
+    public PerformanceLabService.SlowQueryResult slowQuery(
+            @RequestParam(defaultValue = "2000") long durationMs
+    ) {
+        return performanceLabService.executeSlowQuery(durationMs);
+    }
+
+    @PostMapping("/performance/cpu")
+    public PerformanceLabService.PressureSubmission cpuPressure(
+            @RequestParam(defaultValue = "8") int tasks,
+            @RequestParam(defaultValue = "5000") long durationMs
+    ) {
+        return performanceLabService.submitCpuPressure(tasks, durationMs);
+    }
+
+    @PostMapping("/performance/memory")
+    public PerformanceLabService.MemoryAllocation allocateMemory(
+            @RequestParam(defaultValue = "32") int megabytes
+    ) {
+        return performanceLabService.allocateMemory(megabytes);
+    }
+
+    @DeleteMapping("/performance/memory")
+    public PerformanceLabService.MemoryAllocation releaseMemory() {
+        return performanceLabService.releaseMemory();
+    }
+
+    @GetMapping("/performance")
+    public Map<String, Object> performanceStatus() {
+        return performanceLabService.snapshot();
     }
 }

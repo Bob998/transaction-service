@@ -39,3 +39,9 @@ build/
 
 ### macOS ###
 .DS_Store
+
+### JMeter / JVM diagnostics ###
+load-test/results/
+diagnostics/output/
+*.hprof
+gc.log*

@@ -16,7 +16,19 @@ services:
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
       PAYMENT_GATEWAY_BASE_URL: ${PAYMENT_GATEWAY_BASE_URL:-http://app:8080/mock-gateway}
       SERVER_PORT: 8080
-      JAVA_OPTS: ${JAVA_OPTS:--XX:MaxRAMPercentage=75.0}
+      PERFORMANCE_LAB_ENABLED: ${PERFORMANCE_LAB_ENABLED:-true}
+      TOMCAT_MAX_THREADS: ${TOMCAT_MAX_THREADS:-100}
+      TOMCAT_MIN_SPARE_THREADS: ${TOMCAT_MIN_SPARE_THREADS:-10}
+      TOMCAT_ACCEPT_COUNT: ${TOMCAT_ACCEPT_COUNT:-100}
+      DB_POOL_MAX_SIZE: ${DB_POOL_MAX_SIZE:-10}
+      DB_POOL_MIN_IDLE: ${DB_POOL_MIN_IDLE:-2}
+      DB_CONNECTION_TIMEOUT_MS: ${DB_CONNECTION_TIMEOUT_MS:-2000}
+      PERF_WORKER_CORE_SIZE: ${PERF_WORKER_CORE_SIZE:-4}
+      PERF_WORKER_MAX_SIZE: ${PERF_WORKER_MAX_SIZE:-8}
+      PERF_WORKER_QUEUE_CAPACITY: ${PERF_WORKER_QUEUE_CAPACITY:-20}
+      PERF_DATABASE_WORKERS: ${PERF_DATABASE_WORKERS:-20}
+      JAVA_OPTS: ${JAVA_OPTS:--Xms256m -Xmx512m -XX:+UseG1GC -XX:MaxGCPauseMillis=200 -XX:NativeMemoryTracking=summary -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp -Xlog:gc*:file=/tmp/gc.log:time,uptime,level,tags:filecount=5,filesize=10M}
+    mem_limit: ${APP_MEMORY_LIMIT:-768m}
     ports:
       - "${APP_PORT:-8080}:8080"
     depends_on:
@@ -150,6 +162,34 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
+
+  jmeter:
+    image: justb4/jmeter:5.5
+    platform: linux/amd64
+    profiles: ["load-test"]
+    container_name: transaction-jmeter
+    environment:
+      JVM_ARGS: -Xms256m -Xmx512m
+    volumes:
+      - ./load-test:/tests
+    command:
+      - -n
+      - -f
+      - -t
+      - /tests/transaction-capacity.jmx
+      - -JTARGET_HOST=app
+      - -JTARGET_PORT=8080
+      - -JTHREADS=${JMETER_THREADS:-10}
+      - -JRAMP_SECONDS=${JMETER_RAMP_SECONDS:-10}
+      - -JDURATION_SECONDS=${JMETER_DURATION_SECONDS:-60}
+      - -l
+      - /tests/results/results.jtl
+      - -e
+      - -o
+      - /tests/results/report
+    depends_on:
+      app:
+        condition: service_healthy
 
 volumes:
   transaction_postgres_data:
