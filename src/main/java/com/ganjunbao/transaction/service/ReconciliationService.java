@@ -7,6 +7,8 @@ import com.ganjunbao.transaction.reconciliation.ReconciliationSummary;
 import com.ganjunbao.transaction.reconciliation.DifferenceResolution;
 import com.ganjunbao.transaction.repository.AuditLogRepository;
 import org.springframework.stereotype.Service;
+import com.ganjunbao.transaction.observability.BusinessMetrics;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -20,6 +22,12 @@ public class ReconciliationService {
 
     private final ReconciliationMapper reconciliationMapper;
     private final AuditLogRepository auditLogRepository;
+    private BusinessMetrics businessMetrics;
+
+    @Autowired
+    public void setBusinessMetrics(BusinessMetrics businessMetrics) {
+        this.businessMetrics = businessMetrics;
+    }
 
     public ReconciliationService(
             ReconciliationMapper reconciliationMapper,
@@ -121,6 +129,10 @@ public class ReconciliationService {
                 channelStatement.size(),
                 differenceCount
         );
+
+        if (businessMetrics != null) {
+            businessMetrics.reconciliationDifferences(differenceCount);
+        }
 
         return new ReconciliationSummary(
                 batchId,

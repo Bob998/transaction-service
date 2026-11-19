@@ -61,6 +61,10 @@ public class PaymentChannelRepository {
         return paymentChannelMapper.findRoutingCandidates(currency);
     }
 
+    public Optional<PaymentChannel> findActiveById(Long id) {
+        return paymentChannelMapper.findActiveById(id);
+    }
+
     public boolean updateHealthStatus(
             String channelCode,
             ChannelHealthStatus healthStatus

@@ -3,6 +3,8 @@ package com.ganjunbao.transaction.controller;
 import com.ganjunbao.transaction.dto.CreateTransactionRequest;
 import com.ganjunbao.transaction.model.Transaction;
 import com.ganjunbao.transaction.service.TransactionService;
+import com.ganjunbao.transaction.service.PaymentExecutionOutcome;
+import com.ganjunbao.transaction.service.PaymentExecutionService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,9 +20,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/transactions")
 public class TransactionController {
     private final TransactionService transactionService;
+    private final PaymentExecutionService paymentExecutionService;
 
-    public TransactionController(TransactionService transactionService) {
+    public TransactionController(
+            TransactionService transactionService,
+            PaymentExecutionService paymentExecutionService
+    ) {
         this.transactionService = transactionService;
+        this.paymentExecutionService = paymentExecutionService;
     }
 
     @PostMapping
@@ -61,5 +68,10 @@ public class TransactionController {
     @PostMapping("/{id}/fail")
     public Transaction fail(@PathVariable String id) {
         return transactionService.fail(id);
+    }
+
+    @PostMapping("/{id}/execute")
+    public PaymentExecutionOutcome execute(@PathVariable String id) {
+        return paymentExecutionService.executeOnce(id);
     }
 }

@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
+import com.ganjunbao.transaction.observability.BusinessMetrics;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Component
 public class RateLimitInterceptor implements HandlerInterceptor {
@@ -18,6 +20,12 @@ public class RateLimitInterceptor implements HandlerInterceptor {
             LoggerFactory.getLogger(RateLimitInterceptor.class);
 
     private final UserRateLimiter userRateLimiter;
+    private BusinessMetrics businessMetrics;
+
+    @Autowired
+    public void setBusinessMetrics(BusinessMetrics businessMetrics) {
+        this.businessMetrics = businessMetrics;
+    }
 
     public RateLimitInterceptor(UserRateLimiter userRateLimiter) {
         this.userRateLimiter = userRateLimiter;
@@ -53,6 +61,9 @@ public class RateLimitInterceptor implements HandlerInterceptor {
         } catch (DataAccessException exception) {
             // Redis 只承担限流加速。故障时降级放行，数据库约束继续兜底。
             log.warn("Redis 限流不可用，本次请求降级放行", exception);
+            if (businessMetrics != null) {
+                businessMetrics.redisFailure("rate_limit");
+            }
         }
 
         return true;

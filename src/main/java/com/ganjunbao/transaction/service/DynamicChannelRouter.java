@@ -5,6 +5,8 @@ import com.ganjunbao.transaction.model.ChannelHealthStatus;
 import com.ganjunbao.transaction.model.PaymentChannel;
 import com.ganjunbao.transaction.repository.PaymentChannelRepository;
 import org.springframework.stereotype.Service;
+import com.ganjunbao.transaction.observability.BusinessMetrics;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -23,6 +25,12 @@ public class DynamicChannelRouter {
             new BigDecimal("500");
 
     private final PaymentChannelRepository paymentChannelRepository;
+    private BusinessMetrics businessMetrics;
+
+    @Autowired
+    public void setBusinessMetrics(BusinessMetrics businessMetrics) {
+        this.businessMetrics = businessMetrics;
+    }
 
     public DynamicChannelRouter(
             PaymentChannelRepository paymentChannelRepository
@@ -34,7 +42,7 @@ public class DynamicChannelRouter {
             String currency,
             BigDecimal amount
     ) {
-        return paymentChannelRepository
+        ChannelRouteDecision decision = paymentChannelRepository
                 .findRoutingCandidates(currency)
                 .stream()
                 .map(channel -> calculateDecision(channel, amount))
@@ -44,6 +52,12 @@ public class DynamicChannelRouter {
                                 "AUTO:" + currency
                         )
                 );
+        if (businessMetrics != null) {
+            businessMetrics.channelSelected(
+                    decision.channel().getChannelCode()
+            );
+        }
+        return decision;
     }
 
     private ChannelRouteDecision calculateDecision(

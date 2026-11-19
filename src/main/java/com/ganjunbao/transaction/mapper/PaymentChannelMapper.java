@@ -35,6 +35,28 @@ public interface PaymentChannelMapper {
     Optional<PaymentChannel> findActiveByCode(String channelCode);
 
     @Select("""
+            SELECT
+                id,
+                channel_code,
+                channel_name,
+                status,
+                health_status,
+                priority,
+                fixed_cost,
+                cost_rate,
+                success_rate,
+                timeout_ms,
+                supported_currency,
+                last_health_check_at,
+                created_at,
+                updated_at
+            FROM payment_channel
+            WHERE id = #{id}
+              AND status = 'ACTIVE'
+            """)
+    Optional<PaymentChannel> findActiveById(Long id);
+
+    @Select("""
         SELECT
             id,
             channel_code,

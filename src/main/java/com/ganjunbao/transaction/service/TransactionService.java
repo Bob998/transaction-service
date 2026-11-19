@@ -23,6 +23,8 @@ import com.ganjunbao.transaction.risk.RiskAssessment;
 import com.ganjunbao.transaction.risk.RiskAssessmentService;
 import com.ganjunbao.transaction.risk.RiskContext;
 import com.ganjunbao.transaction.risk.UserRiskProfile;
+import com.ganjunbao.transaction.observability.BusinessMetrics;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,6 +48,12 @@ public class TransactionService {
     private final UserRiskProfileRepository userRiskProfileRepository;
     private final RiskAssessmentService riskAssessmentService;
     private final LedgerEntryRepository ledgerEntryRepository;
+    private BusinessMetrics businessMetrics;
+
+    @Autowired
+    public void setBusinessMetrics(BusinessMetrics businessMetrics) {
+        this.businessMetrics = businessMetrics;
+    }
 
     public TransactionService(
             TransactionRepository transactionRepository,
@@ -150,6 +158,9 @@ public class TransactionService {
                             + createdTransaction.getId()
                             + "\",\"status\":\"CREATED\"}"
             );
+            if (businessMetrics != null) {
+                businessMetrics.transactionCreated(channelCode);
+            }
         }
 
         idempotencyResultCache.put(createdTransaction);
@@ -172,10 +183,14 @@ public class TransactionService {
                     request.getAmount()
             );
         } catch (DataAccessException exception) {
+            if (businessMetrics != null) {
+                businessMetrics.redisFailure("risk_window");
+            }
             throw new RiskControlUnavailableException(exception);
         }
 
         if (!windowResult.allowed()) {
+            recordRiskDecision("rejected");
             throw new RiskRejectedException(
                     windowResult.transactionCount(),
                     windowResult.totalAmount()
@@ -209,15 +224,24 @@ public class TransactionService {
                 riskAssessmentService.evaluateAndRecord(context);
 
         if (assessment.rejected()) {
+            recordRiskDecision("rejected");
             throw new RiskRejectedException(
                     "交易被Aviator风控规则拒绝，userId=" + userId
             );
         }
 
         if (assessment.requiresReview()) {
+            recordRiskDecision("review");
             throw new RiskRejectedException(
                     "交易需要人工审核，userId=" + userId
             );
+        }
+        recordRiskDecision("approved");
+    }
+
+    private void recordRiskDecision(String decision) {
+        if (businessMetrics != null) {
+            businessMetrics.riskDecision(decision);
         }
     }
 

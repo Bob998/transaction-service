@@ -215,3 +215,14 @@ flowchart LR
 
 - [数据模型说明](docs/DATA_MODEL.md)
 - [SQL 索引优化记录](docs/SQL_OPTIMIZATION.md)
+
+## 监控与故障排查
+
+`docker compose up --build -d` 会同时启动 Prometheus、Grafana 和 Kafka Exporter：
+
+- Grafana：`http://localhost:3000`（默认 `admin/admin`）；
+- Prometheus：`http://localhost:9091`；
+- 应用指标：`http://localhost:8080/actuator/prometheus`。
+
+指标设计和慢通道熔断实验见
+[第9周可观测性文档](docs/WEEK9_OBSERVABILITY.md)。

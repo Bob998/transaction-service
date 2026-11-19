@@ -14,11 +14,11 @@ services:
       SPRING_DATA_REDIS_HOST: redis
       SPRING_DATA_REDIS_PORT: 6379
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
-      PAYMENT_GATEWAY_BASE_URL: ${PAYMENT_GATEWAY_BASE_URL:-http://host.docker.internal:9090}
-      SERVER_PORT: ${SERVER_PORT:-8080}
+      PAYMENT_GATEWAY_BASE_URL: ${PAYMENT_GATEWAY_BASE_URL:-http://app:8080/mock-gateway}
+      SERVER_PORT: 8080
       JAVA_OPTS: ${JAVA_OPTS:--XX:MaxRAMPercentage=75.0}
     ports:
-      - "${SERVER_PORT:-8080}:${SERVER_PORT:-8080}"
+      - "${APP_PORT:-8080}:8080"
     depends_on:
       postgres:
         condition: service_healthy
@@ -33,7 +33,7 @@ services:
         - curl
         - --fail
         - --silent
-        - http://localhost:${SERVER_PORT:-8080}/actuator/health/readiness
+        - http://localhost:8080/actuator/health/readiness
       interval: 10s
       timeout: 3s
       start_period: 40s
@@ -57,6 +57,53 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
+
+  kafka-exporter:
+    image: danielqsj/kafka-exporter:v1.9.0
+    container_name: transaction-kafka-exporter
+    command:
+      - --kafka.server=kafka:29092
+    depends_on:
+      kafka:
+        condition: service_healthy
+    ports:
+      - "9308:9308"
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:v3.5.0
+    container_name: transaction-prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - transaction_prometheus_data:/prometheus
+    ports:
+      - "9091:9090"
+    depends_on:
+      app:
+        condition: service_healthy
+      kafka-exporter:
+        condition: service_started
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:12.1.1
+    container_name: transaction-grafana
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - transaction_grafana_data:/var/lib/grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+    restart: unless-stopped
 
   redis:
     image: redis:7-alpine
@@ -108,3 +155,5 @@ volumes:
   transaction_postgres_data:
   transaction_redis_data:
   transaction_kafka_data:
+  transaction_prometheus_data:
+  transaction_grafana_data:

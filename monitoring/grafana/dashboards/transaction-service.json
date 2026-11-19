@@ -1,0 +1,116 @@
+{
+  "annotations": {"list": []},
+  "editable": true,
+  "graphTooltip": 1,
+  "panels": [
+    {
+      "title": "请求量 / 秒",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 8, "x": 0, "y": 0},
+      "targets": [{"expr": "sum(rate(http_server_requests_seconds_count{uri!~\"/actuator.*\"}[1m]))", "legendFormat": "RPS"}]
+    },
+    {
+      "title": "HTTP 错误率",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 8, "x": 8, "y": 0},
+      "fieldConfig": {"defaults": {"unit": "percentunit", "min": 0, "max": 1}},
+      "targets": [{"expr": "sum(rate(http_server_requests_seconds_count{status=~\"5..\"}[1m])) / clamp_min(sum(rate(http_server_requests_seconds_count[1m])), 0.001)", "legendFormat": "5xx"}]
+    },
+    {
+      "title": "HTTP P95 / P99",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 8, "x": 16, "y": 0},
+      "fieldConfig": {"defaults": {"unit": "s"}},
+      "targets": [
+        {"expr": "histogram_quantile(0.95, sum by (le) (rate(http_server_requests_seconds_bucket[2m])))", "legendFormat": "P95"},
+        {"expr": "histogram_quantile(0.99, sum by (le) (rate(http_server_requests_seconds_bucket[2m])))", "legendFormat": "P99"}
+      ]
+    },
+    {
+      "title": "通道 P99 延迟",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+      "fieldConfig": {"defaults": {"unit": "s"}},
+      "targets": [{"expr": "histogram_quantile(0.99, sum by (le, channel) (rate(business_channel_request_duration_seconds_bucket[2m])))", "legendFormat": "{{channel}}"}]
+    },
+    {
+      "title": "通道调用成功率",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
+      "fieldConfig": {"defaults": {"unit": "percentunit", "min": 0, "max": 1}},
+      "targets": [{"expr": "(sum by (channel) (rate(business_channel_request_duration_seconds_count{outcome=\"success\"}[2m])) or (0 * sum by (channel) (rate(business_channel_request_duration_seconds_count[2m])))) / sum by (channel) (rate(business_channel_request_duration_seconds_count[2m]))", "legendFormat": "{{channel}}"}]
+    },
+    {
+      "title": "通道熔断状态",
+      "type": "timeseries",
+      "gridPos": {"h": 7, "w": 8, "x": 0, "y": 16},
+      "targets": [{"expr": "technical_channel_circuit_open", "legendFormat": "{{channel}}"}]
+    },
+    {
+      "title": "路由切换次数",
+      "type": "stat",
+      "gridPos": {"h": 7, "w": 4, "x": 8, "y": 16},
+      "targets": [{"expr": "sum(business_routing_failover_total)", "legendFormat": "failover"}]
+    },
+    {
+      "title": "交易成功率",
+      "type": "timeseries",
+      "gridPos": {"h": 7, "w": 6, "x": 12, "y": 16},
+      "fieldConfig": {"defaults": {"unit": "percentunit", "min": 0, "max": 1}},
+      "targets": [{"expr": "((sum(rate(business_transaction_completed_total{outcome=\"succeeded\"}[5m])) or vector(0)) / sum(rate(business_transaction_completed_total[5m])))", "legendFormat": "success rate"}]
+    },
+    {
+      "title": "风控拒绝率",
+      "type": "timeseries",
+      "gridPos": {"h": 7, "w": 6, "x": 18, "y": 16},
+      "fieldConfig": {"defaults": {"unit": "percentunit", "min": 0, "max": 1}},
+      "targets": [{"expr": "sum(rate(business_risk_decision_total{decision=\"rejected\"}[5m])) / clamp_min(sum(rate(business_risk_decision_total[5m])), 0.001)", "legendFormat": "reject rate"}]
+    },
+    {
+      "title": "Tomcat 工作线程",
+      "type": "timeseries",
+      "gridPos": {"h": 7, "w": 6, "x": 0, "y": 23},
+      "targets": [{"expr": "tomcat_threads_busy_threads", "legendFormat": "busy"}, {"expr": "tomcat_threads_current_threads", "legendFormat": "current"}]
+    },
+    {
+      "title": "Hikari 连接池",
+      "type": "timeseries",
+      "gridPos": {"h": 7, "w": 6, "x": 6, "y": 23},
+      "targets": [{"expr": "hikaricp_connections_active", "legendFormat": "active"}, {"expr": "hikaricp_connections_pending", "legendFormat": "pending"}, {"expr": "hikaricp_connections_idle", "legendFormat": "idle"}]
+    },
+    {
+      "title": "JVM Heap",
+      "type": "timeseries",
+      "gridPos": {"h": 7, "w": 6, "x": 12, "y": 23},
+      "fieldConfig": {"defaults": {"unit": "bytes"}},
+      "targets": [{"expr": "sum(jvm_memory_used_bytes{area=\"heap\"})", "legendFormat": "used"}, {"expr": "sum(jvm_memory_max_bytes{area=\"heap\"})", "legendFormat": "max"}]
+    },
+    {
+      "title": "Kafka Consumer Lag",
+      "type": "timeseries",
+      "gridPos": {"h": 7, "w": 6, "x": 18, "y": 23},
+      "targets": [{"expr": "sum by (consumergroup) (kafka_consumergroup_lag)", "legendFormat": "{{consumergroup}}"}]
+    },
+    {
+      "title": "Redis 异常",
+      "type": "stat",
+      "gridPos": {"h": 6, "w": 6, "x": 0, "y": 30},
+      "targets": [{"expr": "sum(technical_redis_errors_total)", "legendFormat": "errors"}]
+    },
+    {
+      "title": "对账差异数",
+      "type": "stat",
+      "gridPos": {"h": 6, "w": 6, "x": 6, "y": 30},
+      "targets": [{"expr": "sum(business_reconciliation_differences_total)", "legendFormat": "differences"}]
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 41,
+  "tags": ["transaction", "week9"],
+  "templating": {"list": []},
+  "time": {"from": "now-15m", "to": "now"},
+  "timezone": "browser",
+  "title": "Transaction Service - Production Troubleshooting",
+  "uid": "transaction-service-week9",
+  "version": 3
+}

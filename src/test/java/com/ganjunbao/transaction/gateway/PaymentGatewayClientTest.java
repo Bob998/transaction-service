@@ -7,6 +7,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.client.RestClient;
+import com.ganjunbao.transaction.observability.BusinessMetrics;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 import java.math.BigDecimal;
 
@@ -35,7 +37,8 @@ class PaymentGatewayClientTest {
                 RestClient.builder(),
                 wireMockServer.baseUrl(),
                 2000,
-                2000
+                2000,
+                new BusinessMetrics(new SimpleMeterRegistry())
         );
     }
 
@@ -47,7 +50,7 @@ class PaymentGatewayClientTest {
     @Test
     void shouldParseSuccessfulGatewayResponse() {
         wireMockServer.stubFor(
-                post(urlEqualTo("/payments/confirm"))
+                post(urlEqualTo("/channels/SAFE_PAY/payments/confirm"))
                         .willReturn(okJson("""
                                 {
                                   "result": "SUCCESS",
@@ -57,6 +60,7 @@ class PaymentGatewayClientTest {
         );
 
         PaymentGatewayResponse response = paymentGatewayClient.confirm(
+                "SAFE_PAY",
                 "TXN-001",
                 new BigDecimal("100.00"),
                 "CNY"
@@ -66,7 +70,9 @@ class PaymentGatewayClientTest {
         assertEquals("GW-001", response.gatewayTransactionId());
 
         wireMockServer.verify(
-                postRequestedFor(urlEqualTo("/payments/confirm"))
+                postRequestedFor(urlEqualTo(
+                        "/channels/SAFE_PAY/payments/confirm"
+                ))
                         .withRequestBody(equalToJson("""
                                 {
                                   "transactionId": "TXN-001",
@@ -80,13 +86,14 @@ class PaymentGatewayClientTest {
     @Test
     void shouldConvertGatewayServerErrorToBusinessException() {
         wireMockServer.stubFor(
-                post(urlEqualTo("/payments/confirm"))
+                post(urlEqualTo("/channels/SAFE_PAY/payments/confirm"))
                         .willReturn(serverError())
         );
 
         PaymentGatewayException exception = assertThrows(
                 PaymentGatewayException.class,
                 () -> paymentGatewayClient.confirm(
+                        "SAFE_PAY",
                         "TXN-002",
                         new BigDecimal("200.00"),
                         "CNY"
@@ -99,7 +106,9 @@ class PaymentGatewayClientTest {
         );
 
         wireMockServer.verify(
-                postRequestedFor(urlEqualTo("/payments/confirm"))
+                postRequestedFor(urlEqualTo(
+                        "/channels/SAFE_PAY/payments/confirm"
+                ))
         );
     }
 
@@ -110,11 +119,12 @@ class PaymentGatewayClientTest {
                         RestClient.builder(),
                         wireMockServer.baseUrl(),
                         200,
-                        200
+                        200,
+                        new BusinessMetrics(new SimpleMeterRegistry())
                 );
 
         wireMockServer.stubFor(
-                post(urlEqualTo("/payments/confirm"))
+                post(urlEqualTo("/channels/SAFE_PAY/payments/confirm"))
                         .willReturn(
                                 aResponse()
                                         .withStatus(200)
@@ -135,6 +145,7 @@ class PaymentGatewayClientTest {
         PaymentGatewayTimeoutException exception = assertThrows(
                 PaymentGatewayTimeoutException.class,
                 () -> shortTimeoutClient.confirm(
+                        "SAFE_PAY",
                         "TXN-SLOW",
                         new BigDecimal("300.00"),
                         "CNY"
