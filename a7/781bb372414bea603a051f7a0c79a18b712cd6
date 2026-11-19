@@ -1,0 +1,67 @@
+.env.example
+  h_f973ca68e14391 6,8-9
+README.md
+  h_f973ca68e14391 218-228
+compose.yaml
+  h_f973ca68e14391 17-18,21,36,61-107,158-159
+docs/WEEK9_OBSERVABILITY.md
+  h_f973ca68e14391 1-84
+monitoring/grafana/dashboards/transaction-service.json
+  h_f973ca68e14391 1-116
+monitoring/grafana/provisioning/dashboards/dashboards.yml
+  h_f973ca68e14391 1-10
+monitoring/grafana/provisioning/datasources/prometheus.yml
+  h_f973ca68e14391 1-10
+monitoring/prometheus/prometheus.yml
+  h_f973ca68e14391 1-13
+pom.xml
+  h_f973ca68e14391 53-56
+src/main/java/com/ganjunbao/transaction/config/RateLimitInterceptor.java
+  h_f973ca68e14391 13-14,23-28,64-66
+src/main/java/com/ganjunbao/transaction/controller/MockPaymentGatewayController.java
+  h_f973ca68e14391 1-49
+src/main/java/com/ganjunbao/transaction/controller/OperationsController.java
+  h_f973ca68e14391 1-56
+src/main/java/com/ganjunbao/transaction/controller/TransactionController.java
+  h_f973ca68e14391 6-7,23-28,30,71-75
+src/main/java/com/ganjunbao/transaction/gateway/GatewayFaultSimulator.java
+  h_f973ca68e14391 1-41
+src/main/java/com/ganjunbao/transaction/gateway/PaymentGatewayClient.java
+  h_f973ca68e14391 5,15,21,30-31,42,46,57-58,61-64,69,77,84,88-93
+src/main/java/com/ganjunbao/transaction/mapper/PaymentChannelMapper.java
+  h_f973ca68e14391 38-59
+src/main/java/com/ganjunbao/transaction/observability/BusinessMetrics.java
+  h_f973ca68e14391 1-79
+src/main/java/com/ganjunbao/transaction/observability/ChannelCircuitBreaker.java
+  h_f973ca68e14391 1-129
+src/main/java/com/ganjunbao/transaction/repository/PaymentChannelRepository.java
+  h_f973ca68e14391 64-67
+src/main/java/com/ganjunbao/transaction/service/DynamicChannelRouter.java
+  h_f973ca68e14391 8-9,28-33,45,55-60,90
+src/main/java/com/ganjunbao/transaction/service/PaymentExecutionService.java
+  h_f973ca68e14391 7-10,20-22,27-30,35-37,42-48,50-55,58,65,67,71,73,78,80
+src/main/java/com/ganjunbao/transaction/service/ReconciliationService.java
+  h_f973ca68e14391 10-11,25-30,132-135
+src/main/java/com/ganjunbao/transaction/service/TransactionService.java
+  h_f973ca68e14391 26-27,51-56,161-163,186-188,193,227,234,238-244
+src/main/resources/application.properties
+  h_f973ca68e14391 90,97-112
+src/test/java/com/ganjunbao/transaction/gateway/PaymentGatewayClientTest.java
+  h_f973ca68e14391 10-11,40-41,53,63,73-75,89,96,109-111,121,123,127,148
+src/test/java/com/ganjunbao/transaction/observability/ChannelCircuitBreakerTest.java
+  h_f973ca68e14391 1-38
+src/test/java/com/ganjunbao/transaction/service/PaymentExecutionServiceTest.java
+  h_f973ca68e14391 6-10,15,33-43,50-53,55,67-70,77
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.6",
+  "base_commit_sha": "a7781bb372414bea603a051f7a0c79a18b712cd6",
+  "prompts": {},
+  "logical_commit_id": "a7781bb372414bea603a051f7a0c79a18b712cd6",
+  "humans": {
+    "h_f973ca68e14391": {
+      "author": "ganjunbao <ganjunbao@bigo.sg>"
+    }
+  }
+}
