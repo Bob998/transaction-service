@@ -1,0 +1,49 @@
+.env.example
+  h_f973ca68e14391 7-22
+.gitignore
+  h_f973ca68e14391 42-47
+Dockerfile
+  h_f973ca68e14391 16,24,36
+README.md
+  h_f973ca68e14391 229-239
+compose.yaml
+  h_f973ca68e14391 19-31,165-192
+diagnostics/README.md
+  h_f973ca68e14391 1-41
+diagnostics/capture-jvm.sh
+  h_f973ca68e14391 1-21
+docs/WEEK10_PERFORMANCE_TUNING.md
+  h_f973ca68e14391 1-198
+load-test/README.md
+  h_f973ca68e14391 1-35
+load-test/transaction-capacity.jmx
+  h_f973ca68e14391 1-114
+monitoring/grafana/dashboards/transaction-service.json
+  h_f973ca68e14391 30,34,37,41,105-160,165,171
+src/main/java/com/ganjunbao/transaction/controller/OperationsController.java
+  h_f973ca68e14391 5,22,26-27,31,59-112
+src/main/java/com/ganjunbao/transaction/exception/GlobalExceptionHandler.java
+  h_f973ca68e14391 16-43
+src/main/java/com/ganjunbao/transaction/exception/PerformanceLabDisabledException.java
+  h_f973ca68e14391 1-8
+src/main/java/com/ganjunbao/transaction/exception/PerformanceLabRequestException.java
+  h_f973ca68e14391 1-8
+src/main/java/com/ganjunbao/transaction/observability/PerformanceLabService.java
+  h_f973ca68e14391 1-410
+src/main/resources/application.properties
+  h_f973ca68e14391 8-13,107-111,124-133
+src/test/java/com/ganjunbao/transaction/observability/PerformanceLabServiceTest.java
+  h_f973ca68e14391 1-81
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.6",
+  "base_commit_sha": "55b7197d5c91c1a2742b05c40a63025d599ea998",
+  "prompts": {},
+  "logical_commit_id": "55b7197d5c91c1a2742b05c40a63025d599ea998",
+  "humans": {
+    "h_f973ca68e14391": {
+      "author": "ganjunbao <ganjunbao@bigo.sg>"
+    }
+  }
+}
