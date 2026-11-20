@@ -1,5 +1,6 @@
 package com.ganjunbao.transaction.controller;
 
+import com.ganjunbao.transaction.deployment.DeploymentLabService;
 import com.ganjunbao.transaction.gateway.GatewayFaultSimulator;
 import com.ganjunbao.transaction.observability.ChannelCircuitBreaker;
 import com.ganjunbao.transaction.observability.PerformanceLabService;
@@ -20,15 +21,18 @@ public class OperationsController {
     private final GatewayFaultSimulator faultSimulator;
     private final ChannelCircuitBreaker circuitBreaker;
     private final PerformanceLabService performanceLabService;
+    private final DeploymentLabService deploymentLabService;
 
     public OperationsController(
             GatewayFaultSimulator faultSimulator,
             ChannelCircuitBreaker circuitBreaker,
-            PerformanceLabService performanceLabService
+            PerformanceLabService performanceLabService,
+            DeploymentLabService deploymentLabService
     ) {
         this.faultSimulator = faultSimulator;
         this.circuitBreaker = circuitBreaker;
         this.performanceLabService = performanceLabService;
+        this.deploymentLabService = deploymentLabService;
     }
 
     @PostMapping("/channels/{channelCode}/fault")
@@ -110,5 +114,17 @@ public class OperationsController {
     @GetMapping("/performance")
     public Map<String, Object> performanceStatus() {
         return performanceLabService.snapshot();
+    }
+
+    @GetMapping("/release")
+    public DeploymentLabService.ReleaseSnapshot release() {
+        return deploymentLabService.snapshot();
+    }
+
+    @PostMapping("/readiness")
+    public DeploymentLabService.ReleaseSnapshot changeReadiness(
+            @RequestParam boolean ready
+    ) {
+        return deploymentLabService.changeReadiness(ready);
     }
 }

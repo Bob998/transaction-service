@@ -45,3 +45,6 @@ load-test/results/
 diagnostics/output/
 *.hprof
 gc.log*
+
+### Kubernetes local secrets ###
+k8s/base/secret.yaml

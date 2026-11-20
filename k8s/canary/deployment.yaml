@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: transaction-service-canary
+  namespace: transaction-system
+  labels:
+    app: transaction-service
+    track: canary
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: transaction-service
+      track: canary
+  template:
+    metadata:
+      labels:
+        app: transaction-service
+        track: canary
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+      containers:
+        - name: app
+          image: transaction-service:week11-v2
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef:
+                name: transaction-config
+            - secretRef:
+                name: transaction-secret
+          env:
+            - name: APP_VERSION
+              value: week11-v2
+            - name: RELEASE_TRACK
+              value: canary
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: JAVA_OPTS
+              value: -Xms256m -Xmx512m -XX:+UseG1GC
+          ports:
+            - name: http
+              containerPort: 8080
+          startupProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: http
+            failureThreshold: 30
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: http
+            periodSeconds: 3
+            failureThreshold: 2
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: http
+            periodSeconds: 10
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: "1"
+              memory: 768Mi

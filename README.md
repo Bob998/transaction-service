@@ -237,3 +237,11 @@ flowchart LR
 - 优化前后使用同一负载复测并记录新的系统容量边界。
 
 详见 [第10周容量与调优报告](docs/WEEK10_PERFORMANCE_TUNING.md)。
+
+## 第11周：Kubernetes发布与回滚
+
+项目提供Deployment、Service、ConfigMap、Secret创建脚本、Ingress、三类健康探针、
+资源requests/limits、HPA、滚动更新、回滚和灰度Deployment示例。
+
+部署步骤见 [Kubernetes实操说明](k8s/README.md)，设计说明见
+[第11周Kubernetes说明](docs/WEEK11_KUBERNETES.md)。

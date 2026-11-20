@@ -1,5 +1,6 @@
 package com.ganjunbao.transaction.exception;
 
+import com.ganjunbao.transaction.deployment.DeploymentLabDisabledException;
 import com.ganjunbao.transaction.dto.ErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +14,20 @@ import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+    @ExceptionHandler(DeploymentLabDisabledException.class)
+    public ResponseEntity<ErrorResponse> handleDeploymentLabDisabled(
+            DeploymentLabDisabledException exception
+    ) {
+        ErrorResponse response = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.FORBIDDEN.value(),
+                "DEPLOYMENT_LAB_DISABLED",
+                exception.getMessage(),
+                Map.of()
+        );
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+    }
+
     @ExceptionHandler(PerformanceLabDisabledException.class)
     public ResponseEntity<ErrorResponse> handlePerformanceLabDisabled(
             PerformanceLabDisabledException exception
