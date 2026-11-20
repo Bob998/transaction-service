@@ -1,0 +1,19 @@
+k8s/README.md
+  h_f973ca68e14391 103,106
+k8s/base/kafka.yaml
+  h_f973ca68e14391 38
+k8s/canary/deployment.yaml
+  h_f973ca68e14391 27,36
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.6",
+  "base_commit_sha": "cc9fc3297da49edfb3051e8086ffc949824f3892",
+  "prompts": {},
+  "logical_commit_id": "cc9fc3297da49edfb3051e8086ffc949824f3892",
+  "humans": {
+    "h_f973ca68e14391": {
+      "author": "ganjunbao <ganjunbao@bigo.sg>"
+    }
+  }
+}
