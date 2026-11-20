@@ -10,6 +10,7 @@ import org.apache.ibatis.annotations.Update;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,12 +28,13 @@ public interface ReconciliationMapper {
             SELECT transaction_no, amount
             FROM payment_transaction
             WHERE status = 'SUCCEEDED'
-              AND created_at >= #{businessDate}
-              AND created_at < #{businessDate} + INTERVAL '1 day'
+              AND created_at >= #{startAt}
+              AND created_at < #{endAt}
             ORDER BY transaction_no
             """)
     List<ReconciliationCandidate> findSuccessfulTransactions(
-            LocalDate businessDate
+            @Param("startAt") OffsetDateTime startAt,
+            @Param("endAt") OffsetDateTime endAt
     );
 
     @Insert("""

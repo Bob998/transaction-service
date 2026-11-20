@@ -115,6 +115,47 @@ class TransactionApiIntegrationTest extends PostgresContainerTest {
     }
 
     @Test
+    void shouldRejectReusedIdempotencyKeyWithDifferentPayload()
+            throws Exception {
+        String idempotencyKey = "api-idempotency-mismatch-"
+                + UUID.randomUUID();
+        String originalRequest = """
+                {
+                  "amount": 36.00,
+                  "description": "原始请求",
+                  "idempotencyKey": "%s",
+                  "currency": "CNY",
+                  "channelCode": "DEMO"
+                }
+                """.formatted(idempotencyKey);
+        String conflictingRequest = """
+                {
+                  "amount": 36.00,
+                  "description": "被修改的请求",
+                  "idempotencyKey": "%s",
+                  "currency": "CNY",
+                  "channelCode": "DEMO"
+                }
+                """.formatted(idempotencyKey);
+
+        mockMvc.perform(
+                        post("/api/transactions")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(originalRequest)
+                )
+                .andExpect(status().isCreated());
+
+        mockMvc.perform(
+                        post("/api/transactions")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(conflictingRequest)
+                )
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code")
+                        .value("DUPLICATE_IDEMPOTENCY_KEY"));
+    }
+
+    @Test
     void shouldReturnOriginalTransactionAfterIdempotencyCacheEviction()
             throws Exception {
         String idempotencyKey = "api-cache-miss-" + UUID.randomUUID();
@@ -163,6 +204,7 @@ class TransactionApiIntegrationTest extends PostgresContainerTest {
     void shouldEvictStaleIdempotencyCacheAfterStatusChange()
             throws Exception {
         String idempotencyKey = "api-cache-consistency-" + UUID.randomUUID();
+        String userId = "cache-user-" + UUID.randomUUID();
         String requestBody = """
                 {
                   "amount": 77.00,
@@ -175,6 +217,7 @@ class TransactionApiIntegrationTest extends PostgresContainerTest {
 
         String createResponse = mockMvc.perform(
                         post("/api/transactions")
+                                .header("X-User-Id", userId)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(requestBody)
                 )
@@ -201,12 +244,15 @@ class TransactionApiIntegrationTest extends PostgresContainerTest {
 
         mockMvc.perform(
                         post("/api/transactions")
+                                .header("X-User-Id", userId)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(requestBody)
                 )
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(transactionId))
-                .andExpect(jsonPath("$.status").value("RISK_APPROVED"));
+                .andExpect(jsonPath("$.status").value("RISK_APPROVED"))
+                .andExpect(jsonPath("$.version").value(1))
+                .andExpect(jsonPath("$.userId").value(userId));
 
         assertThat(redisTemplate.hasKey(redisKey)).isTrue();
     }

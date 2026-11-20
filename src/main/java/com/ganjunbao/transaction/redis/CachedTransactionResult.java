@@ -13,6 +13,8 @@ public record CachedTransactionResult(
         String currency,
         String description,
         TransactionStatus status,
+        Long version,
+        String userId,
         OffsetDateTime createdAt,
         OffsetDateTime updatedAt
 ) {

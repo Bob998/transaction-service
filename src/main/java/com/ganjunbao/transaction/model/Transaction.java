@@ -66,6 +66,34 @@ public class Transaction {
             OffsetDateTime createdAt,
             OffsetDateTime updatedAt
     ) {
+        this(
+                id,
+                idempotencyKey,
+                userId,
+                channelId,
+                amount,
+                currency,
+                description,
+                status,
+                0L,
+                createdAt,
+                updatedAt
+        );
+    }
+
+    public Transaction(
+            String id,
+            String idempotencyKey,
+            String userId,
+            Long channelId,
+            BigDecimal amount,
+            String currency,
+            String description,
+            TransactionStatus status,
+            Long version,
+            OffsetDateTime createdAt,
+            OffsetDateTime updatedAt
+    ) {
         this.id = id;
         this.idempotencyKey = idempotencyKey;
         this.userId = userId;
@@ -74,6 +102,7 @@ public class Transaction {
         this.currency = currency;
         this.description = description;
         this.status = status;
+        this.version = version;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }

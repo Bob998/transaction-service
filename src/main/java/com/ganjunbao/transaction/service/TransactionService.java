@@ -94,6 +94,7 @@ public class TransactionService {
                 .get(request.getIdempotencyKey())
                 .orElse(null);
         if (cachedTransaction != null) {
+            validateIdempotentReplay(request, cachedTransaction);
             return cachedTransaction;
         }
 
@@ -101,6 +102,7 @@ public class TransactionService {
                 .findByIdempotencyKey(request.getIdempotencyKey())
                 .orElse(null);
         if (existingTransaction != null) {
+            validateIdempotentReplay(request, existingTransaction);
             idempotencyResultCache.put(existingTransaction);
             return existingTransaction;
         }
@@ -145,6 +147,7 @@ public class TransactionService {
             createdTransaction = transactionRepository
                     .findByIdempotencyKey(request.getIdempotencyKey())
                     .orElseThrow(() -> exception);
+            validateIdempotentReplay(request, createdTransaction);
 
             newlyCreated = false;
         }
@@ -165,6 +168,25 @@ public class TransactionService {
 
         idempotencyResultCache.put(createdTransaction);
         return createdTransaction;
+    }
+
+    private void validateIdempotentReplay(
+            CreateTransactionRequest request,
+            Transaction existingTransaction
+    ) {
+        boolean sameAmount = existingTransaction.getAmount()
+                .compareTo(request.getAmount()) == 0;
+        boolean sameCurrency = existingTransaction.getCurrency()
+                .equalsIgnoreCase(request.getCurrency());
+        boolean sameDescription = existingTransaction.getDescription()
+                .equals(request.getDescription());
+
+        if (!sameAmount || !sameCurrency || !sameDescription) {
+            throw new DuplicateIdempotencyKeyException(
+                    request.getIdempotencyKey(),
+                    "请求内容与首次请求不一致"
+            );
+        }
     }
 
     private void evaluateConfigurableRisk(

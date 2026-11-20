@@ -37,6 +37,11 @@ class ReconciliationIntegrationTest extends PostgresContainerTest {
     void shouldFindAllThreeKindsOfDifferences() {
         Transaction amountMismatch = createSucceeded("21.00");
         Transaction channelMissing = createSucceeded("32.00");
+        LocalDate businessDate = LocalDate.now(ZoneOffset.UTC);
+        var startAt = businessDate.atStartOfDay().atOffset(ZoneOffset.UTC);
+        var endAt = businessDate.plusDays(1)
+                .atStartOfDay()
+                .atOffset(ZoneOffset.UTC);
 
         Map<String, BigDecimal> channelStatement = new HashMap<>();
         List<Map<String, Object>> successfulTransactions =
@@ -44,9 +49,9 @@ class ReconciliationIntegrationTest extends PostgresContainerTest {
                         SELECT transaction_no, amount
                         FROM payment_transaction
                         WHERE status = 'SUCCEEDED'
-                          AND created_at >= CURRENT_DATE
-                          AND created_at < CURRENT_DATE + INTERVAL '1 day'
-                        """);
+                          AND created_at >= ?
+                          AND created_at < ?
+                        """, startAt, endAt);
         for (Map<String, Object> row : successfulTransactions) {
             channelStatement.put(
                     row.get("transaction_no").toString(),
@@ -64,7 +69,7 @@ class ReconciliationIntegrationTest extends PostgresContainerTest {
         );
 
         ReconciliationSummary summary = reconciliationService.reconcile(
-                LocalDate.now(ZoneOffset.UTC),
+                businessDate,
                 channelStatement
         );
 

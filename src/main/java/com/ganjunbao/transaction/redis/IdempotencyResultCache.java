@@ -45,6 +45,10 @@ public class IdempotencyResultCache {
                     json,
                     CachedTransactionResult.class
             );
+            if (cachedResult.version() == null) {
+                redisTemplate.delete(key(idempotencyKey));
+                return Optional.empty();
+            }
             return Optional.of(toTransaction(cachedResult));
         } catch (DataAccessException | JsonProcessingException exception) {
             LOGGER.warn(
@@ -65,6 +69,8 @@ public class IdempotencyResultCache {
                 transaction.getCurrency(),
                 transaction.getDescription(),
                 transaction.getStatus(),
+                transaction.getVersion(),
+                transaction.getUserId(),
                 transaction.getCreatedAt(),
                 transaction.getUpdatedAt()
         );
@@ -101,11 +107,13 @@ public class IdempotencyResultCache {
         return new Transaction(
                 result.id(),
                 result.idempotencyKey(),
+                result.userId(),
                 result.channelId(),
                 result.amount(),
                 result.currency(),
                 result.description(),
                 result.status(),
+                result.version(),
                 result.createdAt(),
                 result.updatedAt()
         );

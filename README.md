@@ -2,6 +2,18 @@
 
 一个使用 Java 17、Spring Boot、MyBatis 和 PostgreSQL 实现的最小交易服务。
 
+项目已完成12周工程实战，从交易CRUD逐步演进为包含状态机、可靠消息、动态路由、风控、对账、可观测性、性能实验和Kubernetes发布能力的金融交易系统。最终材料入口见 [第12周最终交付](docs/WEEK12_FINAL_DELIVERABLES.md)。
+
+## 最终交付导航
+
+- [系统架构](docs/ARCHITECTURE.md)
+- [性能优化报告](docs/PERFORMANCE_REPORT.md)
+- [事故复盘](docs/INCIDENT_POSTMORTEM.md)
+- [3分钟系统演示](docs/DEMO_SCRIPT.md)
+- [简历项目描述](docs/RESUME_PROJECT.md)
+- [中英文项目介绍](docs/PROJECT_INTRO_CN_EN.md)
+- [面试问题库](docs/INTERVIEW_QUESTIONS.md)
+
 ## 功能
 
 - 创建交易

@@ -88,20 +88,25 @@ class Week7BusinessFlowIntegrationTest extends PostgresContainerTest {
         );
 
         // 用当天全部成功交易构造一致的通道账单，验证日终闭环无差异。
+        LocalDate businessDate = LocalDate.now(ZoneOffset.UTC);
+        var startAt = businessDate.atStartOfDay().atOffset(ZoneOffset.UTC);
+        var endAt = businessDate.plusDays(1)
+                .atStartOfDay()
+                .atOffset(ZoneOffset.UTC);
         Map<String, BigDecimal> channelStatement = new HashMap<>();
         jdbcTemplate.queryForList("""
                 SELECT transaction_no, amount
                 FROM payment_transaction
                 WHERE status = 'SUCCEEDED'
-                  AND created_at >= CURRENT_DATE
-                  AND created_at < CURRENT_DATE + INTERVAL '1 day'
-                """).forEach(row -> channelStatement.put(
+                  AND created_at >= ?
+                  AND created_at < ?
+                """, startAt, endAt).forEach(row -> channelStatement.put(
                 row.get("transaction_no").toString(),
                 new BigDecimal(row.get("amount").toString())
         ));
 
         ReconciliationSummary summary = reconciliationService.reconcile(
-                LocalDate.now(ZoneOffset.UTC),
+                businessDate,
                 channelStatement
         );
 

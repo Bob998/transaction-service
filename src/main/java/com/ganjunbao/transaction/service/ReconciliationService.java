@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -80,7 +81,12 @@ public class ReconciliationService {
     ) {
         long batchId = reconciliationMapper.createBatch(businessDate);
         List<ReconciliationCandidate> localRecords =
-                reconciliationMapper.findSuccessfulTransactions(businessDate);
+                reconciliationMapper.findSuccessfulTransactions(
+                        businessDate.atStartOfDay().atOffset(ZoneOffset.UTC),
+                        businessDate.plusDays(1)
+                                .atStartOfDay()
+                                .atOffset(ZoneOffset.UTC)
+                );
         Map<String, BigDecimal> remainingChannelRecords =
                 new HashMap<>(channelStatement);
         int differenceCount = 0;
