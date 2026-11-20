@@ -1,0 +1,59 @@
+README.md
+  h_f973ca68e14391 5-16
+compose.yaml
+  h_f973ca68e14391 20
+docs/ARCHITECTURE.md
+  h_f973ca68e14391 1-64
+docs/DEMO_SCRIPT.md
+  h_f973ca68e14391 1-28
+docs/INCIDENT_POSTMORTEM.md
+  h_f973ca68e14391 1-33
+docs/INTERVIEW_QUESTIONS.md
+  h_f973ca68e14391 1-369
+docs/PERFORMANCE_REPORT.md
+  h_f973ca68e14391 1-27
+docs/PROJECT_INTRO_CN_EN.md
+  h_f973ca68e14391 1-23
+docs/RESUME_PROJECT.md
+  h_f973ca68e14391 1-27
+docs/WEEK12_FINAL_DELIVERABLES.md
+  h_f973ca68e14391 1-25
+k8s/base/configmap.yaml
+  h_f973ca68e14391 18
+scripts/demo-system.sh
+  h_f973ca68e14391 1-53
+src/main/java/com/ganjunbao/transaction/exception/DuplicateIdempotencyKeyException.java
+  h_f973ca68e14391 9-16
+src/main/java/com/ganjunbao/transaction/mapper/ReconciliationMapper.java
+  h_f973ca68e14391 13,31-32,36-37
+src/main/java/com/ganjunbao/transaction/model/Transaction.java
+  h_f973ca68e14391 69-96,105
+src/main/java/com/ganjunbao/transaction/redis/CachedTransactionResult.java
+  h_f973ca68e14391 16-17
+src/main/java/com/ganjunbao/transaction/redis/IdempotencyResultCache.java
+  h_f973ca68e14391 48-51,72-73,110,116
+src/main/java/com/ganjunbao/transaction/service/ReconciliationService.java
+  h_f973ca68e14391 16,84-89
+src/main/java/com/ganjunbao/transaction/service/TransactionService.java
+  h_f973ca68e14391 97,105,150,171-189
+src/main/resources/application.properties
+  h_f973ca68e14391 98-99
+src/test/java/com/ganjunbao/transaction/controller/TransactionApiIntegrationTest.java
+  h_f973ca68e14391 118-158,207,220,247,253-255
+src/test/java/com/ganjunbao/transaction/e2e/Week7BusinessFlowIntegrationTest.java
+  h_f973ca68e14391 91-95,101-103,109
+src/test/java/com/ganjunbao/transaction/service/ReconciliationIntegrationTest.java
+  h_f973ca68e14391 40-44,52-54,72
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.6",
+  "base_commit_sha": "6d5399d953b16bc3d321efdba5ab8d6a65bb37f2",
+  "prompts": {},
+  "logical_commit_id": "6d5399d953b16bc3d321efdba5ab8d6a65bb37f2",
+  "humans": {
+    "h_f973ca68e14391": {
+      "author": "ganjunbao <ganjunbao@bigo.sg>"
+    }
+  }
+}
