@@ -24,7 +24,7 @@ spec:
         runAsGroup: 10001
       containers:
         - name: app
-          image: transaction-service:week11-v2
+          image: transaction-service:week11-v3-canary
           imagePullPolicy: IfNotPresent
           envFrom:
             - configMapRef:
@@ -33,7 +33,7 @@ spec:
                 name: transaction-secret
           env:
             - name: APP_VERSION
-              value: week11-v2
+              value: week11-v3-canary
             - name: RELEASE_TRACK
               value: canary
             - name: POD_NAME

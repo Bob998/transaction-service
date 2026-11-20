@@ -100,10 +100,10 @@ kubectl -n transaction-system rollout status deployment/transaction-service
 
 ## 灰度实验
 
-先构建v2，然后部署一个canary Pod：
+先构建独立的canary版本，然后部署一个canary Pod：
 
 ```bash
-./k8s/scripts/build-image.sh week11-v2
+./k8s/scripts/build-image.sh week11-v3-canary
 kubectl apply -f k8s/canary/deployment.yaml
 kubectl -n transaction-system rollout status \
   deployment/transaction-service-canary
